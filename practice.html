@@ -1,0 +1,379 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>1단계 · 사다리 연습</title>
+  <link rel="stylesheet" href="assets/style.css">
+  <style>
+    /* ---------- 학생 태블릿: 한 상황으로 사다리 네 칸을 대화처럼 오름 ---------- */
+    .wrap { max-width: 1120px; }
+    .hidden { display: none !important; }
+    .stage-tag { display: inline-block; font-family: var(--font-head); font-size: .95rem; padding: 2px 14px; border-radius: 999px; background: var(--rung1); }
+
+    /* 시작·마무리 화면 */
+    .start { display: grid; grid-template-columns: 1fr 1fr; gap: 36px; align-items: center; padding-top: 10px; }
+    .start h1 { font-size: clamp(2rem, 5vw, 3rem); margin: 10px 0 8px; }
+    .start .lead { color: var(--ink-soft); margin: 0 0 18px; }
+    .start ul { margin: 0 0 20px; padding-left: 1.2em; }
+    .row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+
+    /* 별 사다리 (아래 = 출발) */
+    .sl { position: relative; display: flex; flex-direction: column-reverse; gap: 12px; padding: 6px 30px; }
+    .sl::before, .sl::after { content: ""; position: absolute; top: 0; bottom: 0; width: 10px; border-radius: 5px; background: var(--wood); }
+    .sl::before { left: 10px; } .sl::after { right: 10px; }
+    .sr { position: relative; z-index: 1; display: flex; align-items: center; gap: 12px; padding: 10px 14px; border-radius: var(--radius-sm); background: #fff; border: 3px solid var(--line); }
+    .sr .st { width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; font-size: 1.15rem; background: var(--line); color: var(--ink-soft); flex: 0 0 auto; }
+    .sr.star { border-color: var(--c); box-shadow: 0 4px 0 var(--c); }
+    .sr.star .st { background: var(--c); color: #fff; }
+    .sr.rung1.star .st { color: var(--ink); }
+    .sr.part { border-color: var(--c); border-style: dashed; }
+    .sr.now { outline: 4px solid var(--focus); outline-offset: 2px; }
+    .sr b { font-family: var(--font-head); font-weight: 400; display: block; line-height: 1.3; }
+    .sr small { color: var(--ink-soft); font-size: .85rem; }
+
+    /* 연습 화면 */
+    .play { display: grid; grid-template-columns: 1fr 1.05fr; gap: 26px; align-items: start; }
+    .scene { background: #fff; border: 3px solid var(--ink); border-radius: var(--radius-lg); overflow: hidden; }
+    .scene img { display: block; width: 100%; aspect-ratio: 16 / 9; object-fit: cover; }
+    .scene .txt { padding: 14px 18px; }
+    .scene h2 { font-size: 1.5rem; margin: 0 0 4px; }
+    .scene p { margin: 0; }
+    .clues { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+    .clues span { font-size: .9rem; padding: 2px 10px; border-radius: 999px; background: var(--sky); }
+    .chat { display: flex; flex-direction: column; gap: 10px; margin-top: 16px; }
+    .b { max-width: 88%; padding: 10px 14px; border-radius: 16px; line-height: 1.45; }
+    .b small { display: block; font-size: .78rem; opacity: .8; }
+    .b.me { align-self: flex-end; background: #fff; border: 3px solid var(--c); border-bottom-right-radius: 4px; }
+    .b.fr { align-self: flex-start; background: var(--sky); border-bottom-left-radius: 4px; }
+    .b.fr.real { background: color-mix(in srgb, var(--rung2) 22%, #fff); }
+    .b.fr.want { background: color-mix(in srgb, var(--rung3) 22%, #fff); }
+
+    .task { background: #fff; border: 2px solid var(--line); border-radius: var(--radius-lg); padding: 20px; }
+    .task h3 { font-size: 1.45rem; margin: 6px 0 4px; }
+    .task .lead { color: var(--ink-soft); margin: 0 0 12px; }
+    .quote { padding: 8px 14px; border-left: 6px solid var(--rung0); background: #f4f3f8; border-radius: 0 8px 8px 0; margin: 0 0 12px; font-size: 1.15rem; }
+    textarea.say { width: 100%; min-height: 3.2em; font: inherit; font-size: 1.2rem; padding: 10px 12px; border: 3px solid var(--line); border-radius: var(--radius-sm); resize: vertical; background: #fff; }
+    textarea.say:focus { border-color: var(--focus); outline: none; }
+    .fb { margin-top: 10px; padding: 10px 14px; border-radius: var(--radius-sm); font-size: 1rem; }
+    .fb.no { background: #fff4e5; border: 2px solid var(--rung1); }
+    .fb.yes { background: #eef8ec; border: 2px solid var(--rung3); }
+    .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+    .chip { font-size: .9rem; padding: 3px 12px; border-radius: 999px; border: 2px solid var(--line); background: #fff; }
+
+    /* 출발 칸: 말 분류하기 */
+    .sort { display: grid; gap: 10px; }
+    .sort .it { display: grid; grid-template-columns: 1fr auto; gap: 10px; align-items: center; padding: 10px 12px; border: 2px solid var(--line); border-radius: var(--radius-sm); }
+    .sort .it.right { border-color: var(--rung3); background: #f1f9ef; }
+    .sort .it.wrong { border-color: #e0614f; background: #fdf0ee; }
+    .sort .it .s { font-size: 1.1rem; }
+    .sort .it .why { grid-column: 1 / -1; font-size: .9rem; color: var(--ink-soft); }
+    .seg { display: flex; gap: 4px; }
+    .seg button { min-width: 52px; min-height: 42px; border-radius: 10px; border: 2px solid var(--c); background: #fff; cursor: pointer; font-family: var(--font-head); font-size: .95rem; }
+    .seg button[aria-pressed="true"] { background: var(--c); }
+    .seg .rung0[aria-pressed="true"], .seg .rung2[aria-pressed="true"], .seg .rung3[aria-pressed="true"] { color: #fff; }
+
+    /* 고르기 도움 */
+    .pick { display: grid; gap: 8px; margin-top: 10px; }
+    .pick button { text-align: left; padding: 12px 14px; border-radius: var(--radius-sm); border: 2px solid var(--ink); background: #fff; cursor: pointer; font-size: 1.1rem; }
+    .pick button.no { border-color: #e0614f; background: #fdf0ee; }
+
+    /* 도울 방법 */
+    .hp { display: grid; gap: 8px; }
+    .hp .h { display: grid; grid-template-columns: 26px 1fr; gap: 8px; align-items: start; padding: 8px 0; border-top: 2px dashed var(--line); }
+    .hp .h input[type=text] { width: 100%; font: inherit; font-size: 1.05rem; padding: 6px 8px; border: 2px solid var(--line); border-radius: 8px; }
+    .hp .h .ck { grid-column: 2; display: flex; flex-wrap: wrap; gap: 6px; }
+    .hp .h .ck label { font-size: .85rem; display: inline-flex; gap: 4px; align-items: center; padding: 2px 10px; border-radius: 999px; border: 2px solid var(--line); cursor: pointer; }
+    .hp .h .ck input { width: 18px; height: 18px; }
+    .actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 14px; }
+
+    @media (max-width: 860px) { .start, .play { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="./">마음 사다리</a>
+    <span class="where">1단계 · 혼자 연습 (태블릿)</span>
+  </header>
+
+  <main class="wrap">
+    <!-- 시작 / 마무리 -->
+    <section id="home" class="start">
+      <div>
+        <span class="stage-tag">1단계 · 혼자 연습</span>
+        <h1 id="homeTitle">사다리를 한 칸씩 올라가요</h1>
+        <p class="lead" id="homeLead">그림 속 친구에게 사다리 네 칸 순서대로 말을 걸어 봐요. 칸마다 바로 알려 줘요.</p>
+        <ul id="homeList">
+          <li>스스로 해내면 그 칸에 <b>★</b>이 생겨요.</li>
+          <li>두 번 막히면 고르기로 도와줘요. 그 칸은 다른 친구로 다시 연습해요.</li>
+          <li>네 칸 모두 ★을 받으면 2단계 역할극 준비 끝!</li>
+        </ul>
+        <div class="row">
+          <button class="btn primary" id="startBtn">연습 시작</button>
+          <button class="btn" id="resetBtn">처음부터 (다음 친구에게 넘기기)</button>
+        </div>
+      </div>
+      <div class="sl" id="homeLadder" aria-label="나의 별 사다리"></div>
+    </section>
+
+    <!-- 연습 -->
+    <section id="play" class="play hidden">
+      <div>
+        <article class="scene" id="scene"></article>
+        <div class="chat" id="chat" aria-live="polite"></div>
+      </div>
+      <div>
+        <div class="task" id="task"></div>
+        <div class="sl" id="playLadder" style="margin-top:18px" aria-label="지금 칸"></div>
+      </div>
+    </section>
+
+    <aside class="safety"><b>함께 지키는 약속</b><ul id="safety"></ul></aside>
+  </main>
+
+  <script src="assets/data.js"></script>
+  <script src="assets/game-data.js"></script>
+  <script src="assets/ladder-check.js"></script>
+  <script>
+    const $ = (id) => document.getElementById(id);
+    const pickOne = (a) => a[Math.floor(Math.random() * a.length)];
+    const shuffle = (a) => a.map(v => [Math.random(), v]).sort((x, y) => x[0] - y[0]).map(x => x[1]);
+    const esc = (s) => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+
+    /* ---------- 이 기기에만 남는 기록 ---------- */
+    const KEY = "maeum-ladder-practice";
+    let rec = { stars: [false, false, false, false], tried: [false, false, false, false], seen: [], rounds: 0 };
+    try { rec = Object.assign(rec, JSON.parse(localStorage.getItem(KEY)) || {}); } catch (e) {}
+    const saveRec = () => { try { localStorage.setItem(KEY, JSON.stringify(rec)); } catch (e) {} };
+
+    /* ---------- 이번 판 ---------- */
+    let card = null, todo = [], cur = -1, fails = 0, scaffold = false, open = "", helpAsk = "";
+
+    /* ---------- 별 사다리 ---------- */
+    function ladderHTML(nowStep) {
+      return LADDER.map(r => {
+        const s = rec.stars[r.step], t = rec.tried[r.step];
+        const cls = s ? "star" : t ? "part" : "";
+        const mark = s ? "★" : t ? "…" : r.step === 0 ? "출" : r.step;
+        const note = s ? "스스로 해냈어요" : t ? "도움을 받았어요 · 다시 연습" : r.hint;
+        return `<div class="sr ${r.color} ${cls} ${nowStep === r.step ? "now" : ""}"><span class="st">${mark}</span>
+          <div><b>${r.name}</b><small>${note}</small></div></div>`;
+      }).join("");
+    }
+
+    function showHome() {
+      $("home").classList.remove("hidden"); $("play").classList.add("hidden");
+      $("homeLadder").innerHTML = ladderHTML(-1);
+      const n = rec.stars.filter(Boolean).length;
+      if (rec.rounds === 0) { $("startBtn").textContent = "연습 시작"; return; }
+      if (n === 4) {
+        $("homeTitle").textContent = "네 칸 모두 ★! 준비 끝";
+        $("homeLead").textContent = "사다리 네 칸을 스스로 올랐어요. 이제 2단계 역할극에서 진짜 말로 해 봐요.";
+        $("homeList").innerHTML = "<li>다른 친구로 한 번 더 연습해도 좋아요.</li><li>역할극에서는 관찰자 카드가 이 네 칸을 확인해요.</li>";
+        $("startBtn").textContent = "다른 친구로 한 번 더";
+      } else {
+        $("homeTitle").textContent = `★ ${n}개 / 4칸`;
+        $("homeLead").textContent = "★이 없는 칸만 새로운 친구와 다시 연습해요. ★을 받은 칸은 예시 문장으로 자동으로 지나가요.";
+        $("homeList").innerHTML = LADDER.filter(r => !rec.stars[r.step]).map(r => `<li>${r.name}: ${r.hint}</li>`).join("");
+        $("startBtn").textContent = "★ 없는 칸 다시 연습";
+      }
+    }
+
+    /* ---------- 판 시작: 안 본 상황을 고름 ---------- */
+    function startRound() {
+      let pool = GAME_CARDS.filter(c => !rec.seen.includes(c.n));
+      if (!pool.length) { rec.seen = []; pool = GAME_CARDS.slice(); }
+      card = pickOne(pool);
+      rec.seen.push(card.n); rec.rounds++; saveRec();
+      const all = rec.stars.every(Boolean);
+      todo = all ? [0, 1, 2, 3] : [0, 1, 2, 3].filter(k => !rec.stars[k]);
+      open = pickOne(OPEN_ASKS); helpAsk = pickOne(HELP_ASKS);
+      $("home").classList.add("hidden"); $("play").classList.remove("hidden");
+      drawScene(); $("chat").innerHTML = "";
+      cur = -1; nextStep(0);
+      window.scrollTo(0, 0);
+    }
+
+    function drawScene() {
+      $("scene").innerHTML = `<img alt="${card.n}번 상황 그림" src="${imgPath(card.n)}">
+        <div class="txt"><h2>${card.who}</h2><p>${card.view}</p>
+        <div class="clues">${card.see.map(s => `<span>${s}</span>`).join("")}</div></div>`;
+      $("scene").querySelector("img").onerror = (e) => e.target.remove();   // 그림이 없으면 글만
+    }
+
+    /* ---------- 대화 기록 ---------- */
+    function say(step, text) {
+      const r = LADDER[step];
+      $("chat").insertAdjacentHTML("beforeend", `<div class="b me ${r.color}" style="--c:var(--${r.color})"><small>나 · ${r.name}</small>${esc(text)}</div>`);
+    }
+    function hear(text, kind = "") {
+      $("chat").insertAdjacentHTML("beforeend", `<div class="b fr ${kind}"><small>${card.who}</small>${esc(text)}</div>`);
+    }
+
+    // ★ 받은 칸은 예시 문장으로 자동 진행 (대화가 끊기지 않게)
+    function autoStep(step) {
+      if (step === 0) { say(0, card.judge); hear(card.judgeReply); }
+      if (step === 1) { say(1, card.check); hear(card.checkReply); }
+      if (step === 2) { say(2, open); hear(card.reveal, "real"); }
+      if (step === 3) { say(3, helpAsk); hear(card.want, "want"); }
+    }
+
+    function nextStep(from) {
+      for (let s = from; s < 4; s++) {
+        if (todo.includes(s)) { cur = s; fails = 0; scaffold = false; drawTask(); return; }
+        autoStep(s);
+      }
+      finishRound();
+    }
+
+    function pass(step, wrote) {
+      const star = !scaffold;
+      rec.tried[step] = true;
+      if (star) rec.stars[step] = true;
+      saveRec();
+      return star;
+    }
+
+    /* ---------- 칸별 과제 ---------- */
+    function head(step, title, lead) {
+      const r = LADDER[step];
+      return `<span class="chip" style="border-color:var(--${r.color})">${r.name}</span>
+        <h3>${title}</h3><p class="lead">${lead}</p>`;
+    }
+
+    function drawTask() {
+      $("playLadder").innerHTML = ladderHTML(cur);
+      if (cur === 0) return taskSort();
+      if (cur === 1) return taskWrite(1, "짐작을 질문으로 바꿔요",
+        `출발 칸의 말을 ${card.who}에게 묻는 말로 바꿔 써요.`, `<p class="quote">“${card.judge}”</p>`,
+        LadderCheck.rung1, [card.check, card.judge.replace(/\.$/, "!"), card.optionQ]);
+      if (cur === 2) return taskWrite(2, "마음을 직접 물어요",
+        `${card.who}가 자기 마음을 스스로 말할 수 있게 물어봐요. 마음 낱말은 넣지 않아요.`, "",
+        LadderCheck.rung2, [open, card.optionQ, card.check]);
+      if (cur === 3) return taskWrite(3, "도움을 물어요",
+        `${card.who}의 마음을 들었어요. 이제 무엇을 도와주면 좋을지 물어봐요.`, "",
+        LadderCheck.rung3, [helpAsk, "내가 대신 다 해 줄게.", "힘내! 별일 아니야."]);
+    }
+
+    // 출발 칸: 네 문장을 사다리 칸에 올려놓기
+    function taskSort() {
+      const items = shuffle([
+        { s: card.judge, a: 0, why: "내 짐작을 사실처럼 말했어요." },
+        { s: card.check, a: 1, why: "짐작한 마음에 물음표를 붙였어요." },
+        { s: open, a: 2, why: "마음 낱말 없이 물었어요. 친구가 직접 말해요." },
+        { s: helpAsk, a: 3, why: "무엇을 도와줄지 물었어요." }
+      ]);
+      const pickd = items.map(() => -1);
+      const draw = (checked) => {
+        $("task").innerHTML = head(0, "말을 사다리 칸에 올려놓아요",
+          `${card.who}에게 건넬 수 있는 말 네 개예요. 각 말이 어느 칸인지 골라요.`) +
+          `<div class="sort">${items.map((it, i) => {
+            const st = checked ? (pickd[i] === it.a ? "right" : "wrong") : "";
+            return `<div class="it ${st}"><span class="s">“${esc(it.s)}”</span>
+              <span class="seg">${LADDER.map(r => `<button class="${r.color}" style="--c:var(--${r.color})" data-i="${i}" data-a="${r.step}" aria-pressed="${pickd[i] === r.step}">${r.step === 0 ? "출발" : r.step + "층"}</button>`).join("")}</span>
+              ${checked && scaffold ? `<span class="why">정답: ${LADDER[it.a].name} · ${it.why}</span>` : ""}</div>`;
+          }).join("")}</div>
+          <div class="actions"><button class="btn primary" id="ok">확인하기</button></div><div id="fb"></div>`;
+        $("task").querySelectorAll(".seg button").forEach(b => b.onclick = () => { pickd[+b.dataset.i] = +b.dataset.a; draw(false); });
+        $("ok").onclick = () => {
+          if (pickd.includes(-1)) { $("fb").innerHTML = `<div class="fb no">네 문장 모두 칸을 골라요.</div>`; return; }
+          const right = items.every((it, i) => pickd[i] === it.a);
+          if (right) {
+            const star = pass(0);
+            say(0, card.judge); hear(card.judgeReply);
+            $("task").innerHTML = head(0, star ? "★ 출발 칸 통과!" : "출발 칸 통과", "단정하는 말을 들은 친구의 대답을 보세요. 이제 사다리를 올라가요.") +
+              `<div class="fb yes">“${esc(card.judge)}” → ${card.who}: “${esc(card.judgeReply)}”<br>짐작을 사실처럼 말하면 대화가 닫히기 쉬워요.</div>
+              <div class="actions"><button class="btn primary" id="go">1층으로</button></div>`;
+            $("playLadder").innerHTML = ladderHTML(0);
+            $("go").onclick = () => nextStep(1);
+            return;
+          }
+          fails++; if (fails >= 2) scaffold = true;
+          draw(true);
+          $("fb").innerHTML = `<div class="fb no">${scaffold ? "정답과 까닭을 보고 다시 골라 보세요." : "빨간 칸을 다시 생각해 보세요. 칸 이름의 힌트를 떠올려요."}</div>`;
+        };
+      };
+      draw(false);
+    }
+
+    // 1~3층: 직접 쓰기 → 두 번 막히면 고르기 도움
+    function taskWrite(step, title, lead, extra, check, choices) {
+      const r = LADDER[step];
+      $("task").innerHTML = head(step, title, lead) + extra +
+        `<textarea class="say" id="say" rows="2" placeholder="${card.who}에게 할 말을 써요"></textarea>
+        <div class="actions"><button class="btn primary" id="ok">말 건네기</button></div><div id="fb"></div><div id="fbPick"></div>`;
+      $("say").focus();
+      $("ok").onclick = () => {
+        const t = $("say").value;
+        const res = check(t);
+        if (res.ok) return passed(step, t, scaffold ? res.msg + " 이 칸은 다음 판에서 새로운 친구로 다시 연습해요." : res.msg);
+        fails++;
+        $("fb").innerHTML = `<div class="fb no">${res.msg}</div>`;
+        if (fails >= 2 && !scaffold) showPick(step, choices, check);
+      };
+    }
+
+    function showPick(step, choices, check) {
+      scaffold = true;
+      const opts = shuffle(choices);
+      $("fbPick").innerHTML = `<div class="fb no" style="margin-top:8px"><b>고르기 도움:</b> 이 중 ${LADDER[step].name}에 맞는 말을 골라요. (직접 고쳐 써도 돼요)
+        <div class="pick">${opts.map((o, i) => `<button data-i="${i}">“${esc(o)}”</button>`).join("")}</div></div>`;
+      $("fbPick").querySelectorAll(".pick button").forEach(b => b.onclick = () => {
+        const o = opts[+b.dataset.i];
+        if (o === choices[0]) passed(step, o, "맞아요. 이 칸은 다음 판에서 새로운 친구로 다시 연습해요.");
+        else { b.classList.add("no"); b.disabled = true; }
+      });
+    }
+
+    function passed(step, text, msg) {
+      const star = pass(step);
+      say(step, text);
+      if (step === 1) hear(LadderCheck.reply1(text, card));
+      if (step === 2) hear(card.reveal, "real");
+      if (step === 3) hear(card.want, "want");
+      $("playLadder").innerHTML = ladderHTML(step);
+      const next = step === 3 ? "도울 방법 찾기" : `${step + 1}층으로`;
+      $("task").innerHTML = head(step, star ? `★ ${LADDER[step].name} 통과!` : `${LADDER[step].name} 통과`, msg) +
+        (step === 2 ? `<div class="fb yes">물어보니 ${card.who}가 진짜 마음을 말해 주었어요. 처음 짐작과 같았나요?</div>` : "") +
+        `<div class="actions"><button class="btn primary" id="go">${next}</button></div>`;
+      $("go").onclick = () => step === 3 ? taskHelps() : nextStep(step + 1);
+    }
+
+    // 3층 이어서: 친구의 바람을 듣고 도울 방법 세 가지 이상
+    function taskHelps() {
+      $("task").innerHTML = head(3, "도울 방법을 세 가지 이상 찾아요",
+        `${card.who}의 바람: “${esc(card.want)}” 이 바람을 바탕으로 도울 방법을 써요. 쓴 방법마다 세 가지 기준을 점검해요.`) +
+        `<div class="hp">${[0, 1, 2, 3, 4].map(i => `<div class="h"><b>${i + 1}.</b><input type="text" id="h${i}" placeholder="${i < 3 ? "도울 방법" : "더 있으면 (선택)"}">
+          <div class="ck">${HELP_SHORT.map((q, j) => `<label><input type="checkbox" id="c${i}_${j}">${q}</label>`).join("")}</div></div>`).join("")}</div>
+        <div class="actions"><button class="btn primary" id="ok">확인하기</button></div><div id="fb"></div>`;
+      $("ok").onclick = () => {
+        const items = [0, 1, 2, 3, 4].map(i => ({ text: $("h" + i).value, checks: [0, 1, 2].map(j => $(`c${i}_${j}`).checked) }));
+        const res = LadderCheck.helps(items);
+        if (!res.ok) { $("fb").innerHTML = `<div class="fb no">${res.msg}</div>`; return; }
+        const mine = items.filter(x => x.text.trim()).map(x => x.text.trim());
+        $("chat").insertAdjacentHTML("beforeend", `<div class="b me rung3" style="--c:var(--rung3)"><small>나 · 도울 방법</small>${mine.map(esc).join("<br>")}</div>`);
+        $("task").innerHTML = head(3, "도울 방법을 찾았어요", res.msg) +
+          `<div class="fb yes"><b>다른 친구들이 생각한 방법도 있어요</b><br>${card.helps.map(esc).join(" · ")}<br>
+          <small>정답이 하나인 건 아니에요. ${card.who}가 "괜찮아"라고 하면 그 대답도 존중해요.</small></div>
+          <div class="actions"><button class="btn primary" id="go">이번 판 마치기</button></div>`;
+        $("go").onclick = () => finishRound();
+      };
+    }
+
+    function finishRound() { showHome(); window.scrollTo(0, 0); }
+
+    $("startBtn").onclick = startRound;
+    $("resetBtn").onclick = () => {
+      if (!confirm("이 기기의 연습 기록(★)을 지우고 처음부터 할까요?")) return;
+      try { localStorage.removeItem(KEY); } catch (e) {}
+      rec = { stars: [false, false, false, false], tried: [false, false, false, false], seen: [], rounds: 0 };
+      $("homeTitle").textContent = "사다리를 한 칸씩 올라가요";
+      $("homeLead").textContent = "그림 속 친구에게 사다리 네 칸 순서대로 말을 걸어 봐요. 칸마다 바로 알려 줘요.";
+      $("homeList").innerHTML = `<li>스스로 해내면 그 칸에 <b>★</b>이 생겨요.</li><li>두 번 막히면 고르기로 도와줘요. 그 칸은 다른 친구로 다시 연습해요.</li><li>네 칸 모두 ★을 받으면 2단계 역할극 준비 끝!</li>`;
+      showHome();
+    };
+    $("safety").innerHTML = SAFETY.map(s => `<li>${s}</li>`).join("");
+    showHome();
+  </script>
+</body>
+</html>

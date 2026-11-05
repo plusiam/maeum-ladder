@@ -1,0 +1,259 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>3단계 · 나의 질문 사다리 (확인)</title>
+  <link rel="stylesheet" href="assets/style.css">
+  <script src="assets/vendor/html2canvas.min.js"></script>
+  <style>
+    .wrap { max-width: 900px; }
+    .hidden { display: none !important; }
+    .stage-tag { display: inline-block; font-family: var(--font-head); font-size: .95rem; padding: 2px 14px; border-radius: 999px; background: var(--rung3); color: #fff; }
+    .step-title { font-size: 1.45rem; margin: 22px 0 6px; }
+    .lead { color: var(--ink-soft); margin: 0 0 12px; }
+    .pick { display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px; }
+    .pick button { position: relative; padding: 10px 4px; border-radius: var(--radius-sm); border: 2px solid var(--ink); background: #fff; cursor: pointer; font-family: var(--font-head); font-size: 1.02rem; }
+    .pick button[aria-pressed="true"] { background: var(--ink); color: #fff; }
+    .pick button.seen::after { content: "연습함"; position: absolute; right: 4px; top: -9px; font-size: .62rem; padding: 0 6px; border-radius: 999px; background: var(--rung1); color: var(--ink); font-family: var(--font-body); }
+    .scene { margin-top: 12px; display: grid; grid-template-columns: 220px 1fr; gap: 14px; align-items: center; padding: 12px; background: var(--sky); border-radius: var(--radius-sm); }
+    .scene img { width: 100%; aspect-ratio: 16 / 9; object-fit: cover; border-radius: 8px; }
+    .scene.noimg { grid-template-columns: 1fr; }
+    .scene .clues { color: var(--ink-soft); font-size: .95rem; }
+
+    /* 저장 영역 */
+    #sheet { background: var(--paper); padding: 22px; border-radius: var(--radius-lg); border: 2px solid var(--line); margin-top: 18px; }
+    .sheet-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+    .sheet-head h2 { font-size: 1.55rem; margin: 0; }
+    .sheet-head input { border: 0; border-bottom: 2px solid var(--line); background: transparent; font: inherit; padding: 4px 2px; width: 170px; }
+    .ladder { position: relative; display: flex; flex-direction: column-reverse; gap: 14px; padding: 8px 40px; margin-top: 12px; }
+    .ladder::before, .ladder::after { content: ""; position: absolute; top: 0; bottom: 0; width: 14px; border-radius: 7px; background: var(--wood); }
+    .ladder::before { left: 14px; } .ladder::after { right: 14px; }
+    .rung { position: relative; z-index: 1; background: #fff; border: 3px solid var(--line); border-radius: var(--radius-sm); padding: 10px 14px; }
+    .rung.pass { border-color: var(--c); box-shadow: 0 5px 0 var(--c); }
+    .rung.fail { border-color: #e0614f; }
+    .rung .top { display: flex; justify-content: space-between; gap: 10px; align-items: center; font-family: var(--font-head); font-size: 1.05rem; }
+    .badge { font-family: var(--font-body); font-size: .82rem; padding: 1px 10px; border-radius: 999px; background: var(--line); }
+    .rung.pass .badge { background: var(--c); color: #fff; }
+    .rung.rung1.pass .badge { color: var(--ink); }
+    .rung.fail .badge { background: #e0614f; color: #fff; }
+    .rung textarea { width: 100%; margin-top: 6px; border: 0; border-bottom: 2px dashed var(--line); resize: none; font: inherit; font-size: 1.15rem; background: transparent; padding: 4px 2px; min-height: 2.2em; }
+    .rung .fixed { margin-top: 4px; font-size: 1.15rem; }
+    .rung .msg { font-size: .92rem; color: #b4483a; margin-top: 4px; }
+    .rung .rep { margin-top: 6px; padding: 6px 12px; border-radius: 12px; background: var(--sky); font-size: 1rem; }
+    .rung .rep small { color: var(--ink-soft); margin-right: 6px; }
+
+    .helpbox { margin-top: 18px; border: 2px solid var(--line); border-radius: var(--radius-sm); background: #fff; padding: 12px 14px; }
+    .helpbox.lock { opacity: .55; }
+    .helpbox h3 { font-size: 1.2rem; margin: 0 0 4px; }
+    .h { display: grid; grid-template-columns: 24px 1fr; gap: 6px 8px; align-items: center; padding: 6px 0; border-top: 2px dashed var(--line); }
+    .h input[type=text] { width: 100%; font: inherit; font-size: 1.02rem; padding: 4px 6px; border: 0; border-bottom: 2px solid var(--line); background: transparent; }
+    .h .ck { grid-column: 2; display: flex; flex-wrap: wrap; gap: 6px; }
+    .h .ck label { font-size: .82rem; display: inline-flex; gap: 4px; align-items: center; padding: 1px 9px; border-radius: 999px; border: 2px solid var(--line); }
+    .hmsg { font-size: .92rem; margin-top: 6px; }
+
+    .think { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 18px; }
+    .think div, .oneline { border: 2px solid var(--line); border-radius: var(--radius-sm); padding: 10px 14px; background: #fff; }
+    .think b, .oneline b, .result b { font-family: var(--font-head); font-weight: 400; }
+    .think textarea, .oneline input { width: 100%; border: 0; font: inherit; resize: none; background: transparent; margin-top: 4px; }
+    .oneline { margin-top: 14px; }
+    .result { margin-top: 16px; padding: 12px 16px; border-radius: var(--radius-sm); background: var(--ink); color: #fff; }
+    .result ul { margin: 4px 0 0; padding-left: 1.2em; }
+    .actions { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 18px; }
+    .note { color: var(--ink-soft); font-size: .95rem; min-height: 1.4em; }
+    @media (max-width: 680px) { .pick { grid-template-columns: repeat(4, 1fr); } .think { grid-template-columns: 1fr; } .ladder { padding: 8px 28px; } .scene { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="./">마음 사다리</a>
+    <span class="where">3단계 · 혼자 확인 (태블릿)</span>
+  </header>
+
+  <main class="wrap">
+    <span class="stage-tag">3단계 · 혼자 확인</span>
+    <h2 class="step-title">처음 만나는 친구를 골라요</h2>
+    <p class="lead">연습과 역할극에서 익힌 사다리를 힌트 없이 써 보는 시간이에요. '연습함' 표시가 없는 친구를 골라요.</p>
+    <div class="pick" id="pick" role="group" aria-label="상황 고르기"></div>
+    <div class="scene" id="scene"></div>
+
+    <section id="sheet">
+      <div class="sheet-head">
+        <h2 id="sheetTitle">나의 질문 사다리</h2>
+        <input id="me" placeholder="번호 또는 별칭" aria-label="번호 또는 별칭">
+      </div>
+      <p class="lead" style="margin-top:6px">출발 칸의 말을 1층부터 한 칸씩 바꿔 써요. 다 쓰면 아래 [확인하기]를 눌러요.</p>
+      <div class="ladder" id="ladder"></div>
+
+      <div class="helpbox lock" id="helpbox">
+        <h3>도울 방법 세 가지 이상</h3>
+        <p class="lead" id="helpLead" style="margin:0 0 4px">3층을 통과하면 친구의 바람이 보여요. 그 바람을 바탕으로 써요.</p>
+        <div id="helps"></div>
+        <div class="hmsg" id="hmsg"></div>
+      </div>
+
+      <div class="think">
+        <div><b>예전에는</b><textarea id="used" rows="3" placeholder="친구 마음은 ~라고 생각했어요."></textarea></div>
+        <div><b>이제는</b><textarea id="now" rows="3" placeholder="친구 마음은 ~라고 생각해요."></textarea></div>
+      </div>
+      <div class="oneline"><b>마음 한 줄</b><input id="line" placeholder="다음 대화에서 꼭 써 보고 싶은 한 문장"></div>
+      <div class="result hidden" id="result"></div>
+    </section>
+
+    <div class="actions">
+      <button class="btn primary" id="check">확인하기</button>
+      <button class="btn" id="save">결과 카드 저장</button>
+      <button class="btn" id="reset">새로 쓰기</button>
+    </div>
+    <p class="note" id="note" aria-live="polite"></p>
+    <aside class="safety"><b>함께 지키는 약속</b><ul id="safety"></ul></aside>
+  </main>
+
+  <script src="assets/data.js"></script>
+  <script src="assets/game-data.js"></script>
+  <script src="assets/ladder-check.js"></script>
+  <script>
+    const $ = (id) => document.getElementById(id);
+    const esc = (s) => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+    const KEY = "maeum-ladder-check";
+    const CHECKS = [null, LadderCheck.rung1, LadderCheck.rung2, LadderCheck.rung3];
+
+    // 1단계 연습에서 이미 만난 친구 (같은 기기일 때만 알 수 있음)
+    let seen = [];
+    try { seen = (JSON.parse(localStorage.getItem("maeum-ladder-practice")) || {}).seen || []; } catch (e) {}
+
+    // 상태: 칸별 확인 횟수와 통과 시점(처음/고쳐서)
+    const blank = () => ({ n: null, me: "", rungs: ["", "", ""], tries: [0, 0, 0], passAt: [0, 0, 0], helps: [0, 1, 2, 3, 4].map(() => ({ text: "", checks: [false, false, false] })), helpTries: 0, helpPass: 0, used: "", now: "", line: "" });
+    let st = blank();
+    try { st = Object.assign(st, JSON.parse(localStorage.getItem(KEY)) || {}); } catch (e) {}
+    if (!st.n) st.n = (GAME_CARDS.find(c => !seen.includes(c.n)) || GAME_CARDS[0]).n;
+    const save = () => { try { localStorage.setItem(KEY, JSON.stringify(st)); } catch (e) {} };
+    const card = () => GAME_CARDS.find(c => c.n === st.n);
+
+    function drawPick() {
+      $("pick").innerHTML = GAME_CARDS.map(c => `<button class="${seen.includes(c.n) ? "seen" : ""}" aria-pressed="${c.n === st.n}" data-n="${c.n}">${c.n} ${c.who}</button>`).join("");
+      $("pick").querySelectorAll("button").forEach(b => b.onclick = () => {
+        if (+b.dataset.n === st.n) return;
+        if (st.rungs.some(x => x.trim()) && !confirm("다른 친구를 고르면 쓴 사다리를 지우고 새로 써요. 바꿀까요?")) return;
+        const keep = { me: st.me, used: st.used, now: st.now, line: st.line };
+        st = Object.assign(blank(), keep, { n: +b.dataset.n }); save(); drawAll();
+      });
+    }
+
+    function drawScene() {
+      const c = card();
+      $("scene").className = "scene";
+      $("scene").innerHTML = `<img alt="${c.n}번 상황 그림" src="${imgPath(c.n)}"><div><b>${c.n}. ${c.who}</b> · ${c.view}<div class="clues">보이는 것: ${c.see.join(" · ")}</div></div>`;
+      $("scene").querySelector("img").onerror = (e) => { e.target.remove(); $("scene").classList.add("noimg"); };
+      $("sheetTitle").textContent = `${c.who}에게 건네는 질문 사다리`;
+    }
+
+    function drawLadder() {
+      const c = card();
+      $("ladder").innerHTML = LADDER.map(r => {
+        if (r.step === 0) return `<div class="rung rung0 pass" style="--c:var(--rung0)"><div class="top">${r.name}<span class="badge">출발</span></div>
+          <div class="fixed">“${esc(c.judge)}”</div><div class="rep"><small>${c.who}</small>${esc(c.judgeReply)}</div></div>`;
+        const k = r.step - 1;
+        return `<div class="rung ${r.color}" style="--c:var(--${r.color})" id="box${k}"><div class="top">${r.name}<span class="badge" id="bd${k}">아직</span></div>
+          <textarea id="r${k}" rows="1" aria-label="${r.name}"></textarea><div id="ms${k}"></div></div>`;
+      }).join("");
+      [0, 1, 2].forEach(k => { $("r" + k).value = st.rungs[k]; $("r" + k).oninput = () => { st.rungs[k] = $("r" + k).value; save(); }; });
+    }
+
+    function drawHelps() {
+      $("helps").innerHTML = st.helps.map((h, i) => `<div class="h"><b>${i + 1}.</b><input type="text" id="h${i}" placeholder="${i < 3 ? "도울 방법" : "더 있으면 (선택)"}">
+        <div class="ck">${HELP_SHORT.map((q, j) => `<label><input type="checkbox" id="c${i}_${j}">${q}</label>`).join("")}</div></div>`).join("");
+      st.helps.forEach((h, i) => {
+        $("h" + i).value = h.text; $("h" + i).oninput = () => { st.helps[i].text = $("h" + i).value; save(); };
+        h.checks.forEach((v, j) => { const el = $(`c${i}_${j}`); el.checked = v; el.onchange = () => { st.helps[i].checks[j] = el.checked; save(); }; });
+      });
+    }
+
+    // 확인 결과를 칸마다 표시 (통과한 칸에만 친구의 대답이 보임)
+    function paint() {
+      const c = card();
+      [0, 1, 2].forEach(k => {
+        const box = $("box" + k), bd = $("bd" + k), ms = $("ms" + k);
+        box.classList.remove("pass", "fail");
+        if (st.passAt[k]) {
+          box.classList.add("pass");
+          bd.textContent = st.passAt[k] === 1 ? "처음에 올라감" : "고쳐서 올라감";
+          const rep = k === 0 ? LadderCheck.reply1(st.rungs[0], c) : k === 1 ? c.reveal : c.want;
+          ms.innerHTML = `<div class="rep"><small>${c.who}</small>${esc(rep)}</div>`;
+        } else if (st.tries[k]) {
+          box.classList.add("fail"); bd.textContent = "다시 생각해요";
+          ms.innerHTML = `<div class="msg">${CHECKS[k + 1](st.rungs[k]).msg}</div>`;
+        } else { bd.textContent = "아직"; ms.innerHTML = ""; }
+      });
+      const open = !!st.passAt[2];
+      $("helpbox").classList.toggle("lock", !open);
+      $("helpLead").innerHTML = open ? `<b>${c.who}의 바람:</b> “${esc(c.want)}” 이 바람을 바탕으로 쓰고, 방법마다 세 가지 기준을 점검해요.` : "3층을 통과하면 친구의 바람이 보여요. 그 바람을 바탕으로 써요.";
+      $("helps").querySelectorAll("input").forEach(el => el.disabled = !open);
+      if (st.helpTries) { const r = LadderCheck.helps(st.helps); $("hmsg").innerHTML = `<span style="color:${r.ok ? "var(--rung3)" : "#b4483a"}">${r.msg}</span>`; } else $("hmsg").innerHTML = "";
+      drawResult();
+    }
+
+    function drawResult() {
+      const done = st.passAt.every(Boolean) && st.helpPass;
+      if (!done) { $("result").classList.add("hidden"); return; }
+      const lab = (p) => p === 1 ? "처음에 올라감" : "고쳐서 올라감";
+      $("result").classList.remove("hidden");
+      $("result").innerHTML = `<b>사다리 확인 결과</b><ul>
+        ${[1, 2, 3].map(s => `<li>${LADDER[s].name}: ${lab(st.passAt[s - 1])}</li>`).join("")}
+        <li>도울 방법: 세 가지 기준을 지킨 방법 ${st.helps.filter(h => h.text.trim().length >= 2 && h.checks.every(Boolean)).length}가지 (${st.helpPass === 1 ? "처음에" : "고쳐서"})</li></ul>`;
+    }
+
+    $("check").onclick = () => {
+      // 아래 칸부터 차례로: 앞 칸을 통과해야 다음 칸을 확인
+      for (let k = 0; k < 3; k++) {
+        if (st.passAt[k]) continue;
+        if (!st.rungs[k].trim()) { $("note").textContent = `${LADDER[k + 1].name} 칸을 써요.`; break; }
+        st.tries[k]++;
+        if (CHECKS[k + 1](st.rungs[k]).ok) st.passAt[k] = st.tries[k];
+        else { $("note").textContent = `${LADDER[k + 1].name} 칸을 고쳐 보세요. 위 칸은 이 칸을 통과한 뒤에 확인해요.`; break; }
+      }
+      if (st.passAt.every(Boolean)) {
+        if (!st.helpPass) {
+          if (st.helps.some(h => h.text.trim())) { st.helpTries++; if (LadderCheck.helps(st.helps).ok) st.helpPass = st.helpTries; }
+          $("note").textContent = st.helpPass ? "모두 확인했어요. 예전엔/이제는을 쓰고 결과 카드를 저장해요." : "사다리를 다 올랐어요. 친구의 바람을 보고 도울 방법을 세 가지 이상 써요.";
+        } else $("note").textContent = "모두 확인했어요. 결과 카드를 저장해요.";
+      }
+      save(); paint();
+      [0, 1, 2].forEach(k => { $("r" + k).readOnly = !!st.passAt[k]; });
+      if (st.helpPass) $("helps").querySelectorAll("input").forEach(el => el.disabled = true);
+    };
+
+    // 결과 카드 저장: 입력칸을 글 상자로 바꿔 찍음
+    $("save").onclick = async () => {
+      if (typeof html2canvas === "undefined") { $("note").textContent = "저장 도구를 불러오지 못했어요. 화면을 사진으로 찍어 주세요."; return; }
+      $("note").textContent = "결과 카드를 만들고 있어요…";
+      const canvas = await html2canvas($("sheet"), {
+        scale: 2, backgroundColor: "#fbfbf8",
+        onclone: (doc) => doc.querySelectorAll("#sheet textarea, #sheet input[type=text], #sheet input:not([type])").forEach(el => {
+          const d = doc.createElement("div"); d.textContent = el.value; d.style.cssText = "white-space:pre-wrap;font-size:1.1rem;min-height:1.6em;padding:4px 2px;border-bottom:2px dashed #d9dde6";
+          el.replaceWith(d);
+        })
+      });
+      const a = document.createElement("a");
+      a.download = `질문사다리_${card().who}_${(st.me || "나").replace(/\s+/g, "")}.png`;
+      a.href = canvas.toDataURL("image/png"); a.click();
+      $("note").textContent = "저장했어요. 사진 앱이나 다운로드 폴더에서 확인해요.";
+    };
+
+    $("reset").onclick = () => {
+      if (!confirm("쓴 내용을 지우고 새로 쓸까요?")) return;
+      const n = st.n; st = blank(); st.n = n; save(); drawAll(); $("note").textContent = "새로 쓸 수 있어요.";
+    };
+
+    function drawAll() {
+      drawPick(); drawScene(); drawLadder(); drawHelps();
+      ["me", "used", "now", "line"].forEach(id => { $(id).value = st[id] || ""; $(id).oninput = () => { st[id] = $(id).value; save(); }; });
+      paint();
+      [0, 1, 2].forEach(k => { $("r" + k).readOnly = !!st.passAt[k]; });
+      if (st.helpPass) $("helps").querySelectorAll("input").forEach(el => el.disabled = true);
+    }
+    $("safety").innerHTML = SAFETY.map(s => `<li>${s}</li>`).join("");
+    drawAll();
+  </script>
+</body>
+</html>
