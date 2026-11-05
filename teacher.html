@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>마음 사다리 · 선생님용</title>
+  <meta name="description" content="마음 사다리 선생님용 안내: 40분 수업 흐름, 칠판 화면, 인쇄 자료">
+  <link rel="stylesheet" href="assets/style.css">
+  <style>
+    .who { display: inline-block; font-family: var(--font-head); padding: 2px 14px; border-radius: 999px; background: var(--ink); color: #fff; font-size: .95rem; }
+    .head h1 { font-size: clamp(2rem, 4.5vw, 3rem); margin: 12px 0 .2em; }
+    .head .sub { color: var(--ink-soft); margin: 0 0 18px; font-size: 1.1rem; }
+    .meta { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .meta div { padding: 14px 18px; background: var(--sky); border-radius: var(--radius-sm); }
+    .meta b { font-family: var(--font-head); font-weight: 400; display: block; color: var(--ink-soft); font-size: .95rem; }
+    .meta p { margin: 2px 0 0; font-size: 1.08rem; }
+    .stulink { margin: 14px 0 0; padding: 12px 18px; border: 2px dashed var(--rung1); border-radius: var(--radius-sm); }
+    .stulink a { word-break: break-all; }
+
+    .steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin: 34px 0 10px; }
+    .stp { border: 2px solid var(--ink); border-radius: var(--radius-lg); background: #fff; padding: 18px; display: flex; flex-direction: column; gap: 10px; }
+    .stp .tag { align-self: flex-start; font-family: var(--font-head); padding: 2px 14px; border-radius: 999px; background: var(--c); }
+    .stp.s2 .tag, .stp.s3 .tag { color: #fff; }
+    .stp h2 { font-size: 1.35rem; margin: 0; }
+    .stp p { margin: 0; color: var(--ink-soft); font-size: 1rem; }
+    .stp .links { display: flex; flex-direction: column; gap: 8px; margin-top: auto; }
+    .stp .grp { font-size: .85rem; color: var(--ink-soft); margin: 4px 0 -2px; }
+    .stp a { display: flex; justify-content: space-between; gap: 8px; padding: 10px 14px; border-radius: var(--radius-sm); border: 2px solid var(--line); text-decoration: none; color: var(--ink); }
+    .stp a:hover { background: var(--sky); border-color: var(--ink); }
+    .stp a small { color: var(--ink-soft); white-space: nowrap; }
+
+    .flow { margin-top: 40px; }
+    .flow ol { list-style: none; margin: 14px 0 0; padding: 0; display: grid; gap: 10px; }
+    .flow li { display: grid; grid-template-columns: 90px 1fr; gap: 16px; padding: 14px 0; border-top: 2px solid var(--line); }
+    .flow .part { font-family: var(--font-head); font-size: 1.1rem; }
+    .flow .part small { display: block; font-family: var(--font-body); color: var(--ink-soft); font-size: .85rem; }
+    .flow h3 { font-size: 1.2rem; margin-bottom: .1em; }
+    .flow p { margin: 0; color: var(--ink-soft); }
+
+    .prep { margin-top: 36px; }
+    .prep ul { margin: 10px 0 0; padding-left: 1.2em; }
+    .prep li { margin: 4px 0; }
+    @media (max-width: 900px) { .steps, .meta { grid-template-columns: 1fr; } .flow li { grid-template-columns: 70px 1fr; } }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="teacher.html">마음 사다리 · 선생님용</a>
+    <span class="where">초등 중·고학년 · <a href="./">학생 첫 화면 보기</a></span>
+  </header>
+
+  <main class="wrap">
+    <section class="head">
+      <span class="who">선생님용</span>
+      <h1>마음 사다리 수업 안내</h1>
+      <p class="sub" id="subtitle"></p>
+      <div class="meta">
+        <div><b>탐구질문</b><p id="inquiry"></p></div>
+        <div><b>일반화</b><p id="general"></p></div>
+      </div>
+      <p class="stulink"><b>학생에게 알려 줄 주소</b> · <a href="./" id="stuurl">학생 첫 화면</a><br>
+        학생 첫 화면에는 1단계 [연습 시작]과 3단계 [확인하기]만 있어요. 칠판 화면·인쇄 자료는 이 선생님용 화면에서 열어요.</p>
+    </section>
+
+    <nav class="steps" aria-label="수업 세 단계 자료">
+      <div class="stp s1" style="--c:var(--rung1)">
+        <span class="tag">1단계 · 연습</span>
+        <h2>친구와 대화 쌓기</h2>
+        <p>칸마다 예시 카드 3장(맞는 말 1 + 피할 말·다른 칸 말)을 고르거나 ✏️ 내 말로 써요. 안 맞으면 친구가 "음, 잘 모르겠어" 하고 힌트가 나와요. 마치면 스스로 점검 3문항 + 좋았던 내 말을 고르고, 기기 안 규칙으로 만든 칭찬 1·조언 1을 봐요. AI는 부르지 않아요.</p>
+        <div class="links">
+          <span class="grp">학생 화면</span>
+          <a href="practice.html">연습 화면 미리 보기 <small>학생 · 태블릿</small></a>
+          <span class="grp">선생님 화면</span>
+          <a href="review.html">대화 기록 검토 (AI 요청문) <small>교사</small></a>
+        </div>
+      </div>
+      <div class="stp s2" style="--c:var(--rung2)">
+        <span class="tag">2단계 · 역할극</span>
+        <h2>3~4인조 역할극</h2>
+        <p>마음 친구 · 들어 주는 친구 · 관찰자(· 기록이)로 역할을 나누고, 라운드마다 바꿔요. 칠판 화면에서 상황 그림, 자리별 역할, 타이머를 띄워요.</p>
+        <div class="links">
+          <span class="grp">선생님 화면 · 인쇄</span>
+          <a href="game.html">칠판 화면 <small>교사 · TV</small></a>
+          <a href="cards.html">카드 · 관찰 카드 · 조 기록지 <small>교사 · 인쇄</small></a>
+        </div>
+      </div>
+      <div class="stp s3" style="--c:var(--rung3)">
+        <span class="tag">3단계 · 확인</span>
+        <h2>나의 질문 사다리</h2>
+        <p>힌트 없이 새 친구의 첫말에 1~3층 대답과 도울 방법 세 가지를 쓰고, 결과 카드를 저장해요. 태블릿이 없으면 A4 학습지로 대신해요.</p>
+        <div class="links">
+          <span class="grp">학생 화면</span>
+          <a href="ladder.html">확인 화면 미리 보기 <small>학생 · 태블릿</small></a>
+          <span class="grp">인쇄</span>
+          <a href="print.html">A4 학습지 <small>교사 · 인쇄</small></a>
+        </div>
+      </div>
+    </nav>
+
+    <section class="flow">
+      <h2>40분 수업 흐름</h2>
+      <ol id="flow"></ol>
+    </section>
+
+    <section class="prep">
+      <h2>수업 전 준비</h2>
+      <ul>
+        <li>학생 태블릿에서 학생 첫 화면 주소를 열어 둬요. (1단계·3단계)</li>
+        <li>TV·전자칠판에 <a href="game.html">칠판 화면</a>을 띄워요. (2단계)</li>
+        <li><a href="cards.html">역할극 카드</a>를 모둠 수만큼 인쇄해요. 태블릿이 없으면 <a href="print.html">A4 학습지</a>도 인쇄해요.</li>
+        <li>1단계 대화를 더 자세히 보고 싶으면 학생에게 [기록 복사](이름 대신 번호)를 받아 <a href="review.html">대화 기록 검토</a>에 붙여 넣고, 선생님 계정의 AI로 검토해요. 고른 말만 학생에게 전해요.</li>
+        <li>칠판 화면에 쓸 상황 그림은 <a href="setup.html">칠판 그림 준비하기</a>에서 만들 수 있어요.</li>
+      </ul>
+    </section>
+
+    <aside class="safety"><b>수업 전에 함께 읽을 약속</b><ul id="safety"></ul></aside>
+
+    <p class="footer">룰루랄라 한기쌤의 개별 수업 도구입니다. 대구마음교육연구회 『마음여행』 8차시 주제에서 출발했지만 따로 구성했으며, 연구회 원고·PPT·활동지와는 별개이고 그 원고에 반영하지 않습니다.</p>
+    <p class="footer" style="margin-top:6px" id="srcnote"></p>
+  </main>
+
+  <script src="assets/data.js"></script>
+  <script>
+    document.getElementById("subtitle").textContent = LESSON.subtitle;
+    document.getElementById("inquiry").textContent = LESSON.inquiry;
+    document.getElementById("general").textContent = LESSON.generalization;
+    document.getElementById("srcnote").textContent = LESSON.source;
+    const stu = new URL("./", location.href).href;
+    document.getElementById("stuurl").textContent = stu;
+    document.getElementById("flow").innerHTML = FLOW.map(f => `
+      <li><div class="part">${f.part}<small>${f.min}분</small></div><div><h3>${f.title}</h3><p>${f.desc}</p></div></li>`).join("");
+    document.getElementById("safety").innerHTML = SAFETY.map(s => `<li>${s}</li>`).join("");
+  </script>
+</body>
+</html>
