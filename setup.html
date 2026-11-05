@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>그림 준비하기</title>
+  <link rel="stylesheet" href="assets/style.css">
+  <style>
+    .wrap { max-width: 1000px; }
+    .how { padding: 16px 20px; background: var(--sky); border-radius: var(--radius-sm); }
+    .how ol { margin: 6px 0 0; padding-left: 1.3em; }
+    .item { display: grid; grid-template-columns: 70px 1fr 200px; gap: 18px; align-items: start; padding: 18px 0; border-top: 2px solid var(--line); }
+    .item .no { width: 60px; height: 60px; border-radius: 50%; background: var(--ink); color: #fff; display: grid; place-items: center; font-family: var(--font-head); font-size: 1.8rem; }
+    .item h3 { font-size: 1.2rem; margin: 0 0 4px; }
+    .item .p { font-size: .98rem; background: #fff; border: 2px solid var(--line); border-radius: var(--radius-sm); padding: 10px 12px; margin: 6px 0; }
+    .item .meta { font-size: .9rem; color: var(--ink-soft); }
+    .thumb { aspect-ratio: 16 / 9; border-radius: var(--radius-sm); border: 2px dashed var(--line); background: #fff center / cover no-repeat; display: grid; place-items: center; font-size: .85rem; color: var(--ink-soft); text-align: center; padding: 6px; }
+    .thumb.ok { border: 2px solid var(--rung3); color: transparent; }
+    .copy { min-height: 40px; padding: 6px 14px; font-size: .95rem; }
+    .copied { color: var(--rung3); font-size: .9rem; margin-left: 8px; }
+    @media (max-width: 760px) { .item { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="./">마음 사다리</a>
+    <span class="where">그림 준비 (교사용) · 1단계 연습 · 2단계 칠판 · 3단계 확인에 함께 쓰여요</span>
+  </header>
+  <main class="wrap">
+    <h1 style="font-size:2rem">칠판에 띄울 그림 준비하기</h1>
+    <div class="how">
+      <b>준비 순서</b>
+      <ol>
+        <li>상황마다 [프롬프트 복사]를 눌러 ChatGPT에 붙여 넣고 그림을 만들어요.</li>
+        <li>그림을 보고 <b>보기 네 가지 마음이 다 떠오를 만큼 애매한지</b> 확인해요. 한 감정이 너무 뚜렷하면 "표정을 더 애매하게"라고 다시 요청해요. (4번 지유는 짐작이 맞는 상황이라 비교적 또렷해도 괜찮아요.)</li>
+        <li>파일 이름을 <b>01.png ~ 12.png</b>로 바꿔 이 서비스의 <b>images</b> 폴더에 넣어요. 그러면 칠판 화면과 학생 태블릿 화면에 자동으로 떠요. 그림이 없으면 상황 글과 단서로 대신 보여 줘요.</li>
+        <li>폴더에 넣기 어려우면, 수업 중 칠판 화면에서 [그림 고르기]로 그때그때 띄워도 돼요.</li>
+      </ol>
+    </div>
+    <div id="list"></div>
+  </main>
+
+  <script src="assets/data.js"></script>
+  <script src="assets/game-data.js"></script>
+  <script>
+    const list = document.getElementById("list");
+    list.innerHTML = GAME_CARDS.map(c => `
+      <div class="item">
+        <div class="no">${c.n}</div>
+        <div>
+          <h3>${c.who} · ${c.view}</h3>
+          <div class="p" id="p${c.n}">${c.prompt} ${IMG_STYLE}</div>
+          <div class="meta">파일 이름: <b>${imgPath(c.n)}</b> · 그림에 꼭 보여야 할 것: ${c.see.join(", ")}</div>
+          <button class="btn copy" data-n="${c.n}">프롬프트 복사</button><span class="copied" id="ok${c.n}"></span>
+        </div>
+        <div class="thumb" id="t${c.n}">아직 그림이 없어요</div>
+      </div>`).join("");
+
+    // 복사 버튼 (복사가 막힌 환경이면 글자를 선택해 둠)
+    list.querySelectorAll(".copy").forEach(b => b.onclick = async () => {
+      const n = b.dataset.n, el = document.getElementById("p" + n);
+      try { await navigator.clipboard.writeText(el.textContent); document.getElementById("ok" + n).textContent = "복사했어요"; }
+      catch (e) {
+        const r = document.createRange(); r.selectNodeContents(el);
+        const s = getSelection(); s.removeAllRanges(); s.addRange(r);
+        document.getElementById("ok" + n).textContent = "선택했어요. Ctrl+C로 복사해요";
+      }
+    });
+
+    // 그림이 폴더에 있는지 확인해서 미리보기
+    GAME_CARDS.forEach(c => {
+      const img = new Image();
+      img.onload = () => { const t = document.getElementById("t" + c.n); t.style.backgroundImage = `url('${img.src}')`; t.classList.add("ok"); t.textContent = "준비됨"; };
+      img.src = imgPath(c.n);
+    });
+  </script>
+</body>
+</html>

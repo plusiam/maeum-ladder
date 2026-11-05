@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>마음 사다리 학습지 (A4)</title>
+  <link rel="stylesheet" href="assets/style.css">
+  <style>
+    /* ---------- A4 한 장: 3단계 확인을 종이로 ---------- */
+    @page { size: A4; margin: 11mm 12mm; }
+    body { background: #e9ecf1; font-size: 14px; line-height: 1.5; }
+    * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .bar { max-width: 210mm; margin: 16px auto 10px; display: flex; gap: 10px; align-items: center; justify-content: space-between; }
+    .bar p { margin: 0; color: var(--ink-soft); font-size: .95rem; }
+    .page { width: 210mm; min-height: 297mm; margin: 0 auto 30px; background: #fff; padding: 11mm 12mm; box-shadow: 0 2px 10px rgba(30,42,74,.15); }
+    .head { display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 3px solid var(--ink); padding-bottom: 6px; }
+    .head h1 { font-size: 26px; margin: 0; }
+    .head h1 small { font-family: var(--font-body); font-size: 13px; color: var(--ink-soft); margin-left: 8px; }
+    .idbox { display: flex; gap: 8px; font-size: 13px; }
+    .idbox span { border-bottom: 1.5px solid var(--ink); min-width: 44px; padding: 0 4px; }
+    .inq { margin: 8px 0 0; padding: 7px 12px; background: var(--sky); border-radius: 8px; }
+    .inq b { font-family: var(--font-head); font-weight: 400; margin-right: 6px; }
+    h2 { font-size: 17px; margin: 13px 0 5px; }
+    h2 small { font-family: var(--font-body); font-size: 12px; color: var(--ink-soft); margin-left: 6px; }
+    .who-line { margin: 0 0 4px; font-size: 13px; }
+    .who-line span { display: inline-block; border-bottom: 1.5px solid var(--ink); min-width: 60px; }
+    .ladder { position: relative; display: flex; flex-direction: column-reverse; gap: 9px; padding: 4px 26px; }
+    .ladder::before, .ladder::after { content: ""; position: absolute; top: 0; bottom: 0; width: 9px; border-radius: 5px; background: var(--wood); }
+    .ladder::before { left: 8px; } .ladder::after { right: 8px; }
+    .rung { position: relative; z-index: 1; border: 2.5px solid var(--c); border-radius: 8px; background: #fff; padding: 5px 10px 3px; }
+    .rung .t { font-family: var(--font-head); font-size: 14px; display: flex; justify-content: space-between; }
+    .rung .t small { font-family: var(--font-body); color: var(--ink-soft); font-size: 11.5px; }
+    .rung .w { border-bottom: 1.5px dashed #9aa3b8; height: 34px; }
+    .rep { font-size: 12px; color: var(--ink-soft); margin-top: 2px; }
+    .rep span { display: inline-block; border-bottom: 1px solid #9aa3b8; min-width: 70%; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1.5px solid var(--ink); padding: 4px 8px; text-align: center; }
+    th { background: #f2f4f8; font-family: var(--font-head); font-weight: 400; font-size: 13px; }
+    td { height: 32px; }
+    td.l { text-align: left; }
+    .wish { border-bottom: 1.5px solid var(--ink); margin: 0 0 6px; font-size: 13px; padding-bottom: 2px; }
+    .think { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .think div { border: 1.5px solid var(--ink); border-radius: 8px; padding: 6px 10px; height: 92px; }
+    .think b, .one b { font-family: var(--font-head); font-weight: 400; }
+    .one { margin-top: 8px; border: 1.5px solid var(--ink); border-radius: 8px; padding: 6px 10px; height: 54px; }
+    .check { display: flex; gap: 14px; flex-wrap: wrap; margin-top: 8px; font-size: 12.5px; }
+    .foot { margin-top: 8px; font-size: 10.5px; color: var(--ink-soft); display: flex; justify-content: space-between; gap: 10px; }
+    @media print {
+      body { background: #fff; }
+      .bar { display: none; }
+      .page { box-shadow: none; margin: 0; width: auto; min-height: 0; padding: 0; }
+    }
+  </style>
+</head>
+<body>
+  <div class="bar">
+    <p>3단계 확인을 종이로 하는 A4 한 장 · 인쇄 설정에서 '배경 그래픽'을 켜 주세요.</p>
+    <button class="btn primary" onclick="window.print()">인쇄하기</button>
+  </div>
+
+  <article class="page">
+    <header class="head">
+      <h1>마음 사다리<small>3단계 · 혼자 확인</small></h1>
+      <div class="idbox"><span>&nbsp;</span>학년 <span>&nbsp;</span>반 <span>&nbsp;</span>번 이름 <span style="min-width:80px">&nbsp;</span></div>
+    </header>
+    <p class="inq"><b>탐구질문</b><span id="inq"></span></p>
+
+    <h2>1. 나의 질문 사다리<small>출발 칸의 단정하는 말을 한 칸씩 바꾸며 올라가요.</small></h2>
+    <p class="who-line">말을 건넬 친구(가상): <span>&nbsp;</span>번 <span style="min-width:90px">&nbsp;</span> · 이 친구가 보이는 모습: <span style="min-width:230px">&nbsp;</span></p>
+    <div class="ladder" id="ladder"></div>
+
+    <h2>2. 친구의 바람을 듣고 도울 방법 세 가지 이상<small>방법마다 세 가지 기준을 점검해요.</small></h2>
+    <p class="wish">친구의 바람: </p>
+    <table>
+      <thead><tr><th style="width:6%"></th><th>도울 방법</th><th id="c0" style="width:12%"></th><th id="c1" style="width:19%"></th><th id="c2" style="width:17%"></th></tr></thead>
+      <tbody id="hrows"></tbody>
+    </table>
+
+    <h2>3. 생각이 어떻게 달라졌나요?</h2>
+    <div class="think">
+      <div><b>예전에는</b> 친구 마음은</div>
+      <div><b>이제는</b> 친구 마음은</div>
+    </div>
+    <div class="one"><b>마음 한 줄</b> 다음 대화에서 꼭 써 볼 문장</div>
+
+    <div class="check">
+      <span>□ 짐작을 질문으로 바꾸었다.</span>
+      <span>□ 마음 낱말 없이 직접 물었다.</span>
+      <span>□ 도움을 묻고, 바람을 바탕으로 세 가지 이상 찾았다.</span>
+      <span>□ '괜찮아'라는 대답도 존중한다.</span>
+    </div>
+    <div class="foot"><span>모든 상황은 가상이에요. 실제 친구 이름이나 경험은 쓰지 않아요.</span><span>룰루랄라 한기쌤 · 마음 사다리</span></div>
+  </article>
+
+  <script src="assets/data.js"></script>
+  <script src="assets/game-data.js"></script>
+  <script>
+    document.getElementById("inq").textContent = LESSON.inquiry;
+    // 칸마다: 출발은 문장 틀, 2층·3층 아래에는 친구의 대답을 적는 줄
+    const REP = { 1: "친구의 대답:", 2: "친구가 말한 진짜 마음:", 3: "친구의 바람: (아래 2번에 옮겨 적어요)" };
+    document.getElementById("ladder").innerHTML = LADDER.map(r => `
+      <div class="rung ${r.color}">
+        <div class="t">${r.name}<small>${r.hint}</small></div>
+        ${r.step === 0 ? `<div class="w" style="padding-top:4px;height:28px">“너 ______________ 구나.”</div>` : `<div class="w"></div>`}
+        ${r.step === 2 ? `<div class="rep">${REP[2]} <span>&nbsp;</span></div>` : ""}
+      </div>`).join("");
+    HELP_SHORT.forEach((q, j) => document.getElementById("c" + j).textContent = q);
+    document.getElementById("hrows").innerHTML = [1, 2, 3, 4].map(i => `<tr><td>${i}</td><td class="l"></td><td>□</td><td>□</td><td>□</td></tr>`).join("");
+  </script>
+</body>
+</html>
