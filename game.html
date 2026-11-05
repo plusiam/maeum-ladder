@@ -1,0 +1,337 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>2단계 · 3~4인조 역할극</title>
+  <link rel="stylesheet" href="assets/style.css">
+  <style>
+    /* ---------- 칠판(TV) 화면: 크게, 단순하게 ---------- */
+    body { font-size: 21px; }
+    .wrap { max-width: 1400px; padding-top: 22px; }
+    .hidden { display: none !important; }
+    .stage-tag { display: inline-block; font-family: var(--font-head); font-size: 1rem; padding: 2px 14px; border-radius: 999px; background: var(--rung2); color: #fff; }
+
+    /* 1. 안내 */
+    .intro { display: grid; grid-template-columns: 0.85fr 1.15fr; gap: 40px; align-items: center; min-height: 68vh; }
+    .scene-no { color: var(--ink-soft); font-size: 1rem; margin: 10px 0 6px; }
+    .scene-title { font-size: clamp(2rem, 4vw, 3rem); margin-bottom: .3em; }
+    .caption { font-size: 1.4rem; line-height: 1.7; margin: 0 0 24px; max-width: 34em; }
+    .ctrl { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+    .ctrl .toggle { font-family: var(--font-body); font-size: .95rem; color: var(--ink-soft); display: flex; gap: 6px; align-items: center; margin-left: 6px; }
+    .visual { display: grid; gap: 12px; }
+    .role { display: flex; gap: 14px; align-items: center; padding: 12px 16px; border-radius: var(--radius-sm); border: 3px solid var(--c); background: #fff; }
+    .role b { font-family: var(--font-head); font-weight: 400; font-size: 1.3rem; min-width: 6.5em; }
+    .role span { font-size: 1rem; color: var(--ink-soft); }
+    .big-ladder { display: flex; flex-direction: column-reverse; gap: 10px; }
+    .big-ladder div { padding: 12px 18px; border-radius: var(--radius-sm); border: 3px solid var(--c); background: #fff; font-size: 1.15rem; }
+    .big-ladder b { font-family: var(--font-head); font-weight: 400; margin-right: 10px; }
+    .note-box { padding: 16px 20px; border-radius: var(--radius-sm); background: var(--sky); font-size: 1.15rem; }
+
+    /* 2. 상황 고르기 */
+    .board-head { display: flex; justify-content: space-between; align-items: end; gap: 16px; flex-wrap: wrap; margin-bottom: 18px; }
+    .board-head h2 { font-size: 2.1rem; margin: 6px 0 0; }
+    .set { display: flex; gap: 18px; flex-wrap: wrap; align-items: center; font-size: 1rem; color: var(--ink-soft); }
+    .seg { display: inline-flex; gap: 4px; margin-left: 6px; }
+    .seg button { min-width: 54px; min-height: 42px; border-radius: 10px; border: 2px solid var(--ink); background: #fff; cursor: pointer; font-family: var(--font-head); font-size: 1rem; }
+    .seg button[aria-pressed="true"] { background: var(--ink); color: #fff; }
+    .grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 16px; }
+    .tile { position: relative; aspect-ratio: 4 / 3; border-radius: var(--radius-lg); border: 3px solid var(--ink); background: #fff center / cover no-repeat; cursor: pointer; overflow: hidden; display: grid; place-items: center; }
+    .tile:hover { outline: 4px solid var(--rung1); }
+    .tile .num { font-family: var(--font-head); font-size: 3rem; line-height: 1; background: rgba(255,255,255,.88); border-radius: 18px; padding: 6px 18px; }
+    .tile.done::after { content: attr(data-r); position: absolute; right: 10px; bottom: 10px; padding: 2px 12px; border-radius: 999px; background: var(--rung3); color: #fff; font-family: var(--font-head); font-size: .9rem; }
+    .board-foot { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-top: 22px; flex-wrap: wrap; }
+
+    /* 3. 라운드 */
+    .call { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 14px 22px; border-radius: var(--radius-lg); background: var(--ink); color: #fff; margin-bottom: 18px; }
+    .call b { font-family: var(--font-head); font-weight: 400; font-size: 1.5rem; }
+    .play { display: grid; grid-template-columns: 1.5fr 1fr; gap: 24px; align-items: start; }
+    .picture { position: relative; aspect-ratio: 16 / 9; border-radius: var(--radius-lg); border: 4px solid var(--ink); background: #fff; overflow: hidden; display: grid; place-items: center; }
+    .picture img { width: 100%; height: 100%; object-fit: contain; background: #fff; }
+    .picture .tag { position: absolute; left: 14px; top: 12px; font-family: var(--font-head); font-size: 1.4rem; background: rgba(255,255,255,.9); border-radius: 12px; padding: 2px 14px; }
+    .picture .credit { position: absolute; right: 12px; bottom: 8px; font-size: .75rem; color: var(--ink-soft); background: rgba(255,255,255,.85); padding: 0 8px; border-radius: 6px; }
+    .picture .textscene { padding: 30px 40px; text-align: center; }
+    .picture .textscene h3 { font-size: 2.2rem; margin: 0 0 10px; }
+    .picture .textscene p { font-size: 1.5rem; margin: 0 0 14px; }
+    .picture .textscene .clues { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; }
+    .picture .textscene .clues span { font-size: 1.05rem; padding: 4px 14px; border-radius: 999px; background: var(--sky); }
+    .empty label { display: inline-block; margin-top: 12px; }
+    .empty input { display: none; }
+    .side h3 { font-size: 1.35rem; margin: 0 0 8px; }
+    .seats { display: grid; gap: 8px; margin-bottom: 16px; }
+    .seat { display: grid; grid-template-columns: 54px 1fr; gap: 10px; align-items: center; padding: 8px 12px; border-radius: var(--radius-sm); border: 3px solid var(--c); background: #fff; }
+    .seat .s { width: 44px; height: 44px; border-radius: 50%; background: var(--ink); color: #fff; display: grid; place-items: center; font-family: var(--font-head); font-size: 1.3rem; }
+    .seat b { font-family: var(--font-head); font-weight: 400; font-size: 1.25rem; }
+    .seat small { display: block; color: var(--ink-soft); font-size: .85rem; line-height: 1.35; }
+    .mini { display: flex; flex-direction: column-reverse; gap: 6px; margin-bottom: 16px; }
+    .mini div { padding: 6px 12px; border-radius: 8px; border-left: 10px solid var(--c); background: #fff; font-size: 1rem; }
+    .timer { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; padding: 12px 16px; border-radius: var(--radius-sm); border: 3px solid var(--ink); background: #fff; }
+    .timer .t { font-family: var(--font-head); font-size: 3rem; line-height: 1; min-width: 3.2em; }
+    .timer.end { border-color: #e0614f; background: #fdf0ee; }
+    .timer .btn { min-height: 44px; padding: 6px 16px; }
+    .play-foot { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 18px; }
+
+    /* 4. 정리 */
+    .wrapup { min-height: 66vh; display: grid; align-content: center; gap: 24px; max-width: 980px; margin: 0 auto; text-align: center; }
+    .wrapup .q { font-family: var(--font-head); font-size: clamp(2rem, 4.5vw, 3.2rem); line-height: 1.35; }
+    .wrapup .sub { font-size: 1.3rem; color: var(--ink-soft); }
+    .wrapup .think { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; text-align: left; }
+    .wrapup .think div { padding: 18px 22px; border-radius: var(--radius-sm); border: 3px solid var(--c); background: #fff; font-size: 1.2rem; }
+    .wrapup .think b { font-family: var(--font-head); font-weight: 400; display: block; font-size: 1.4rem; }
+    .gen { padding: 18px 22px; background: var(--ink); color: #fff; border-radius: var(--radius-sm); font-size: 1.45rem; }
+    .wrapup .big-ladder { max-width: 760px; margin: 0 auto; width: 100%; text-align: left; }
+    .center { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+
+    @media (max-width: 1000px) { .intro, .play { grid-template-columns: 1fr; } .grid { grid-template-columns: repeat(4, 1fr); } .wrapup .think { grid-template-columns: 1fr; } }
+    @media (max-width: 600px) { .grid { grid-template-columns: repeat(3, 1fr); } }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="./">마음 사다리</a>
+    <span class="where" id="where">2단계 · 3~4인조 역할극 · 칠판 화면</span>
+  </header>
+
+  <main class="wrap">
+    <!-- ========== 1. 안내 ========== -->
+    <section id="introView" class="intro">
+      <div class="visual" id="visual"></div>
+      <div>
+        <span class="stage-tag">2단계 · 역할극</span>
+        <p class="scene-no" id="sceneNo"></p>
+        <h1 class="scene-title" id="sceneTitle"></h1>
+        <p class="caption" id="caption"></p>
+        <div class="ctrl">
+          <button class="btn primary" id="playBtn">안내 듣기</button>
+          <button class="btn" id="prevBtn">이전 장면</button>
+          <button class="btn" id="nextBtn">다음 장면</button>
+          <button class="btn" id="skipBtn">상황 고르기로</button>
+          <label class="toggle"><input type="checkbox" id="voiceOn" checked> 읽어 주기</label>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== 2. 상황 고르기 ========== -->
+    <section id="boardView" class="hidden">
+      <div class="board-head">
+        <div><span class="stage-tag" id="roundTag"></span><h2>이번 라운드 그림을 골라요</h2></div>
+        <div class="set">
+          <span>조 인원<span class="seg" id="sizeSeg"></span></span>
+          <span>라운드 시간<span class="seg" id="minSeg"></span></span>
+        </div>
+      </div>
+      <div class="grid" id="grid"></div>
+      <div class="board-foot">
+        <div style="display:flex;gap:10px;flex-wrap:wrap">
+          <button class="btn primary" id="toWrap">정리하러 가기</button>
+          <button class="btn" id="replayIntro">안내 다시 보기</button>
+        </div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap">
+          <a class="btn" href="cards.html">역할극 카드 인쇄</a>
+          <a class="btn" href="setup.html">그림 준비하기</a>
+          <button class="btn" id="newClass">새 수업 시작</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== 3. 라운드 ========== -->
+    <section id="playView" class="hidden">
+      <div class="call"><b id="callText"></b></div>
+      <div class="play">
+        <div>
+          <div class="picture" id="picture"></div>
+          <div class="play-foot">
+            <button class="btn primary" id="endRound">라운드 마치기 · 역할 바꾸기</button>
+            <button class="btn" id="toWrap2">정리하러 가기</button>
+          </div>
+        </div>
+        <aside class="side">
+          <h3 id="seatTitle">자리별 역할</h3>
+          <div class="seats" id="seats"></div>
+          <h3>사다리 순서</h3>
+          <div class="mini" id="mini"></div>
+          <div class="timer" id="timer">
+            <span class="t" id="tNum">4:00</span>
+            <button class="btn primary" id="tGo">시작</button>
+            <button class="btn" id="tReset">처음으로</button>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <!-- ========== 4. 정리 (발문 → 정리 화면) ========== -->
+    <section id="wrapView" class="hidden">
+      <div class="wrapup" id="wrap1">
+        <span class="stage-tag" style="justify-self:center">정리 1 · 함께 생각하기</span>
+        <p class="q">짐작한 마음과 확인한 마음은<br>같았나요? 무엇이 달랐나요?</p>
+        <p class="sub">조 기록지의 ○ / × 를 보며 이야기해요.</p>
+        <div class="think">
+          <div class="rung0" style="--c:var(--rung0)"><b>짐작만 했을 때</b>그림의 단서로 마음을 정했어요.</div>
+          <div class="rung2" style="--c:var(--rung2)"><b>물어서 확인했을 때</b>친구가 진짜 마음과 까닭을 말해 주었어요.</div>
+        </div>
+        <div class="center"><button class="btn primary" id="wrapNext">정리 화면 보기</button></div>
+      </div>
+      <div class="wrapup hidden" id="wrap2">
+        <span class="stage-tag" style="justify-self:center">정리 2 · 우리가 오른 사다리</span>
+        <div class="big-ladder" id="wrapLadder"></div>
+        <p class="gen" id="gen"></p>
+        <p class="sub">이제 <b>3단계</b>: 태블릿으로 새 친구에게 혼자 사다리를 올라 확인해요.</p>
+        <div class="center"><a class="btn primary" href="ladder.html">3단계 확인으로</a><button class="btn" id="wrapBack">상황 고르기로</button></div>
+      </div>
+    </section>
+  </main>
+
+  <script src="assets/data.js"></script>
+  <script src="assets/game-data.js"></script>
+  <script>
+    const $ = (id) => document.getElementById(id);
+
+    /* ---------- 이 기기에 남는 반 상태 (새 수업 시작으로 지움) ---------- */
+    const KEY = "maeum-roleplay-class";
+    const fresh = () => ({ size: 4, mins: 4, round: 1, done: {} });
+    let cls = fresh();
+    try { cls = Object.assign(cls, JSON.parse(localStorage.getItem(KEY)) || {}); } catch (e) {}
+    const saveCls = () => { try { localStorage.setItem(KEY, JSON.stringify(cls)); } catch (e) {} };
+    const uploaded = {};   // 이번 시간에 직접 고른 그림
+
+    const SEATS = ["A", "B", "C", "D"];
+    const rolesFor = (round) => SEATS.slice(0, cls.size).map((s, i) => ({ seat: s, role: ROLES[(i + round - 1) % cls.size] }));
+    const ladderHTML = () => LADDER.map(r => `<div class="${r.color}" style="--c:var(--${r.color})"><b>${r.name}</b>“${r.example}”</div>`).join("");
+
+    /* ---------- 1. 안내 ---------- */
+    let si = 0, speaking = false;
+    const synth = window.speechSynthesis;
+    function visualFor(show) {
+      if (show === "team" || show === "rotate") return `<div class="note-box">${show === "team"
+        ? "<b>3~4명이 한 조</b><br>앉은 자리에 A, B, C, D 이름을 붙여요."
+        : "<b>라운드가 끝나면</b><br>칠판의 자리별 역할을 보고 한 칸씩 바꿔요.<br>새 그림 · 새 친구로 다시!"}</div>` + rolesFor(1).map(x => `<div class="role" style="--c:var(--${x.role.color})"><b>${x.seat} · ${x.role.name}</b><span>1라운드</span></div>`).join("");
+      if (show === "roles") return ROLES.map(r => `<div class="role" style="--c:var(--${r.color})"><b>${r.name}</b><span>${r.job}</span></div>`).join("") + `<div class="note-box" style="font-size:1rem">${WATCHER_WRITES}</div>`;
+      if (show === "ladder") return `<div class="big-ladder">${ladderHTML()}</div>`;
+      if (show === "hint") return OBSERVE.map((o, k) => `<div class="role" style="--c:var(--${LADDER[k].color})"><b>${LADDER[k].short}</b><span>막히면: “${o.hint}”</span></div>`).join("");
+      if (show === "help") return `<div class="note-box"><b>3층에서 들은 친구의 바람</b><br>→ 조가 함께 도울 방법 <b>세 가지 이상</b><br>→ 마음 친구가 가장 마음에 드는 방법에 ★</div>` + HELP_RULE.map(q => `<div class="role" style="--c:var(--rung3)"><b>점검</b><span>${q}</span></div>`).join("");
+      return "";
+    }
+    function drawScene() {
+      const s = NARRATION[si];
+      $("sceneNo").textContent = `장면 ${si + 1} / ${NARRATION.length}`;
+      $("sceneTitle").textContent = s.title;
+      $("caption").textContent = s.say;
+      $("visual").innerHTML = visualFor(s.show);
+      $("prevBtn").disabled = si === 0;
+      $("nextBtn").textContent = si === NARRATION.length - 1 ? "상황 고르기로" : "다음 장면";
+    }
+    function koVoice() {
+      const vs = synth ? synth.getVoices() : [];
+      return vs.find(v => /ko/i.test(v.lang) && /female|여|yuna|sun|heami/i.test(v.name)) || vs.find(v => /ko/i.test(v.lang)) || null;
+    }
+    function speakScene() {
+      if (!synth || !$("voiceOn").checked) return;
+      synth.cancel();
+      const u = new SpeechSynthesisUtterance(NARRATION[si].say);
+      u.lang = "ko-KR"; u.rate = 0.95; u.pitch = 1.05;
+      const v = koVoice(); if (v) u.voice = v;
+      u.onend = () => {
+        speaking = false;
+        if (si < NARRATION.length - 1) setTimeout(() => { if (!speaking && !$("introView").classList.contains("hidden")) { si++; drawScene(); speakScene(); } }, 900);
+      };
+      speaking = true; synth.speak(u);
+      $("playBtn").textContent = "다시 듣기";
+    }
+    const stopVoice = () => { speaking = false; if (synth) synth.cancel(); };
+    $("playBtn").onclick = () => { if (si === NARRATION.length - 1 && !speaking) { si = 0; drawScene(); } speakScene(); };
+    $("prevBtn").onclick = () => { stopVoice(); si = Math.max(0, si - 1); drawScene(); };
+    $("nextBtn").onclick = () => { stopVoice(); if (si === NARRATION.length - 1) return showBoard(); si++; drawScene(); };
+    $("skipBtn").onclick = () => { stopVoice(); showBoard(); };
+    $("voiceOn").onchange = () => { if (!$("voiceOn").checked) stopVoice(); };
+    if (!synth) { $("voiceOn").checked = false; $("voiceOn").disabled = true; $("playBtn").textContent = "자막으로 보기"; }
+
+    /* ---------- 화면 전환 ---------- */
+    function showView(id, where) {
+      ["introView", "boardView", "playView", "wrapView"].forEach(v => $(v).classList.toggle("hidden", v !== id));
+      $("where").textContent = where; window.scrollTo(0, 0);
+    }
+
+    /* ---------- 2. 상황 고르기 ---------- */
+    function seg(el, values, curVal, label, onPick) {
+      el.innerHTML = values.map(v => `<button aria-pressed="${v === curVal}" data-v="${v}">${v}${label}</button>`).join("");
+      el.querySelectorAll("button").forEach(b => b.onclick = () => onPick(+b.dataset.v));
+    }
+    function showBoard() {
+      stopVoice(); stopTimer();
+      showView("boardView", "2단계 역할극 · 상황 고르기");
+      $("roundTag").textContent = `${cls.round}라운드 준비`;
+      seg($("sizeSeg"), [3, 4], cls.size, "명", v => { cls.size = v; saveCls(); showBoard(); });
+      seg($("minSeg"), [3, 4, 5], cls.mins, "분", v => { cls.mins = v; saveCls(); showBoard(); });
+      $("grid").innerHTML = GAME_CARDS.map(c => `
+        <button class="tile ${cls.done[c.n] ? "done" : ""}" data-n="${c.n}" data-r="${cls.done[c.n] ? cls.done[c.n] + "라운드" : ""}" aria-label="${c.n}번 상황"
+          style="background-image:url('${uploaded[c.n] || imgPath(c.n)}')"><span class="num">${c.n}</span></button>`).join("");
+      $("grid").querySelectorAll(".tile").forEach(t => t.onclick = () => openRound(+t.dataset.n));
+    }
+    $("replayIntro").onclick = () => { si = 0; drawScene(); showView("introView", "2단계 역할극 · 안내"); };
+    $("newClass").onclick = () => { if (!confirm("라운드 번호와 '한 상황' 표시를 지우고 새 수업을 시작할까요?")) return; const k = { size: cls.size, mins: cls.mins }; cls = Object.assign(fresh(), k); saveCls(); showBoard(); };
+
+    /* ---------- 3. 라운드 ---------- */
+    let cur = null;
+    function openRound(n) {
+      cur = GAME_CARDS.find(c => c.n === n);
+      showView("playView", `2단계 역할극 · ${cls.round}라운드`);
+      $("callText").textContent = `${cls.round}라운드 · 마음 친구는 ${n}번 카드를 펴요 (다른 친구에게 보여 주지 않아요)`;
+      drawPicture();
+      $("seatTitle").textContent = `${cls.round}라운드 자리별 역할`;
+      $("seats").innerHTML = rolesFor(cls.round).map(x => `<div class="seat" style="--c:var(--${x.role.color})"><span class="s">${x.seat}</span>
+        <div><b>${x.role.name}</b><small>${x.role.job}</small></div></div>`).join("") + (cls.size === 3 ? `<small style="color:var(--ink-soft)">${WATCHER_WRITES}</small>` : "");
+      $("mini").innerHTML = LADDER.map(r => `<div style="--c:var(--${r.color})">${r.name}</div>`).join("");
+      resetTimer();
+    }
+    function drawPicture() {
+      const n = cur.n, src = uploaded[n] || imgPath(n);
+      $("picture").innerHTML = `<img alt="${n}번 상황 그림" src="${src}"><span class="tag">${n}</span><span class="credit">AI 생성 이미지</span>`;
+      $("picture").querySelector("img").onerror = () => {
+        // 그림이 없으면 상황 글과 단서로 띄움 (비밀 마음은 보이지 않음)
+        $("picture").innerHTML = `<div class="textscene empty"><h3>${n}. ${cur.who}</h3><p>${cur.view}</p>
+          <div class="clues">${cur.see.map(s => `<span>${s}</span>`).join("")}</div>
+          <label class="btn" style="font-size:.9rem">그림 고르기<input type="file" accept="image/*" id="pickImg"></label></div>`;
+        $("pickImg").onchange = (e) => { const f = e.target.files[0]; if (!f) return; uploaded[n] = URL.createObjectURL(f); drawPicture(); };
+      };
+    }
+    $("endRound").onclick = () => { cls.done[cur.n] = cls.round; cls.round++; saveCls(); showBoard(); };
+
+    /* ---------- 타이머 ---------- */
+    let left = 0, tick = null;
+    const fmt = (s) => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`;
+    function resetTimer() { stopTimer(); left = cls.mins * 60; $("tNum").textContent = fmt(left); $("timer").classList.remove("end"); $("tGo").textContent = "시작"; }
+    function stopTimer() { if (tick) clearInterval(tick); tick = null; if ($("tGo")) $("tGo").textContent = "이어서"; }
+    function beep() {
+      try { const a = new (window.AudioContext || window.webkitAudioContext)(); [0, .35, .7].forEach(t => { const o = a.createOscillator(), g = a.createGain(); o.frequency.value = 880; o.connect(g); g.connect(a.destination); g.gain.setValueAtTime(.2, a.currentTime + t); o.start(a.currentTime + t); o.stop(a.currentTime + t + .2); }); } catch (e) {}
+    }
+    $("tGo").onclick = () => {
+      if (tick) { stopTimer(); return; }
+      if (left <= 0) resetTimer();
+      $("tGo").textContent = "잠깐 멈춤";
+      tick = setInterval(() => {
+        left--; $("tNum").textContent = fmt(Math.max(0, left));
+        if (left <= 0) { stopTimer(); $("tGo").textContent = "다시 시작"; $("timer").classList.add("end"); $("tNum").textContent = "끝!"; beep(); }
+      }, 1000);
+    };
+    $("tReset").onclick = resetTimer;
+
+    /* ---------- 4. 정리 ---------- */
+    function showWrap() {
+      stopTimer();
+      showView("wrapView", "2단계 역할극 · 정리");
+      $("wrap1").classList.remove("hidden"); $("wrap2").classList.add("hidden");
+    }
+    $("toWrap").onclick = showWrap;
+    $("toWrap2").onclick = () => { cls.done[cur.n] = cls.round; cls.round++; saveCls(); showWrap(); };
+    $("wrapNext").onclick = () => { $("wrap1").classList.add("hidden"); $("wrap2").classList.remove("hidden"); };
+    $("wrapBack").onclick = showBoard;
+    $("wrapLadder").innerHTML = ladderHTML();
+    $("gen").textContent = LESSON.generalization;
+
+    /* ---------- 시작 ---------- */
+    if (synth) synth.onvoiceschanged = () => {};
+    drawScene();
+    if (location.hash === "#board") showBoard();
+  </script>
+</body>
+</html>
