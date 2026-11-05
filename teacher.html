@@ -16,6 +16,13 @@
     .meta p { margin: 2px 0 0; font-size: 1.08rem; }
     .stulink { margin: 14px 0 0; padding: 12px 18px; border: 2px dashed var(--rung1); border-radius: var(--radius-sm); }
     .stulink a { word-break: break-all; }
+    .stulink { display: flex; gap: 16px; align-items: center; }
+    .stulink .qr { flex: 0 0 auto; width: 110px; padding: 6px; background: #fff; border: 2px solid var(--ink); border-radius: 10px; cursor: zoom-in; }
+    .stulink .qr img { display: block; width: 100%; height: auto; }
+    .hidden { display: none !important; }
+    .qrbig { position: fixed; inset: 0; z-index: 60; background: rgba(255,255,255,.97); display: grid; place-items: center; text-align: center; cursor: zoom-out; }
+    .qrbig img { width: min(70vh, 80vw); height: auto; padding: 24px; background: #fff; border: 4px solid var(--ink); border-radius: 20px; }
+    .qrbig p { font-family: var(--font-head); font-size: clamp(1.4rem, 3.5vw, 2.4rem); margin: 18px 0 0; }
 
     .steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin: 34px 0 10px; }
     .stp { border: 2px solid var(--ink); border-radius: var(--radius-lg); background: #fff; padding: 18px; display: flex; flex-direction: column; gap: 10px; }
@@ -58,8 +65,15 @@
         <div><b>탐구질문</b><p id="inquiry"></p></div>
         <div><b>일반화</b><p id="general"></p></div>
       </div>
-      <p class="stulink"><b>학생에게 알려 줄 주소</b> · <a href="./" id="stuurl">학생 첫 화면</a><br>
+      <div class="stulink">
+        <button class="qr" id="qrBtn" aria-label="QR 코드 크게 보기"><img src="assets/qr-home.svg" alt="학생 첫 화면 QR 코드"></button>
+        <p style="margin:0"><b>학생에게 알려 줄 주소</b> · <a href="./" id="stuurl">학생 첫 화면</a><br>
+        QR을 누르면 TV·전자칠판에 크게 띄워요. 학생 첫 화면에도 같은 QR이 있어요.<br>
         학생 첫 화면에는 1단계 [연습 시작]과 3단계 [확인하기]만 있어요. 칠판 화면·인쇄 자료는 이 선생님용 화면에서 열어요.</p>
+      </div>
+      <div class="qrbig hidden" id="qrLayer" role="dialog" aria-label="QR 코드 크게 보기">
+        <div><img src="assets/qr-home.svg" alt="학생 첫 화면 QR 코드"><p>plusiam.github.io/maeum-ladder</p><p style="font-size:1rem;color:var(--ink-soft);font-family:var(--font-body)">화면을 누르면 닫혀요</p></div>
+      </div>
     </section>
 
     <nav class="steps" aria-label="수업 세 단계 자료">
@@ -130,6 +144,10 @@
     document.getElementById("flow").innerHTML = FLOW.map(f => `
       <li><div class="part">${f.part}<small>${f.min}분</small></div><div><h3>${f.title}</h3><p>${f.desc}</p></div></li>`).join("");
     document.getElementById("safety").innerHTML = SAFETY.map(s => `<li>${s}</li>`).join("");
+    const qrLayer = document.getElementById("qrLayer");
+    document.getElementById("qrBtn").onclick = () => qrLayer.classList.remove("hidden");
+    qrLayer.onclick = () => qrLayer.classList.add("hidden");
+    document.addEventListener("keydown", (e) => { if (e.key === "Escape") qrLayer.classList.add("hidden"); });
   </script>
 </body>
 </html>
