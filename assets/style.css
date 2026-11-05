@@ -1,0 +1,77 @@
+/* =========================================================
+   마음 사다리 · 공용 스타일
+   - 색: 사다리 칸마다 고유색(단정=흐린 보라회색 → 확인=햇살 노랑 → 묻기=청록 → 도움=새싹 초록)
+   - 글꼴: Jua(제목, 둥근 손글씨 느낌) + Gowun Dodum(본문)
+   ========================================================= */
+@import url("https://fonts.googleapis.com/css2?family=Gowun+Dodum&family=Jua&display=swap");
+
+:root {
+  --paper: #fbfbf8;      /* 바탕: 종이 흰색 */
+  --ink: #1e2a4a;        /* 글자: 짙은 남색 */
+  --ink-soft: #55607d;   /* 보조 글자 */
+  --line: #d9dde6;       /* 선 */
+  --sky: #e7eff8;        /* 하늘색 면 */
+  --rung0: #a9a3bd;      /* 단정 */
+  --rung1: #f2b544;      /* 짐작을 질문으로 */
+  --rung2: #3fa7a0;      /* 마음 직접 묻기 */
+  --rung3: #5fae4e;      /* 도움 묻기 */
+  --wood: #c98d4b;       /* 사다리 기둥 */
+  --focus: #2f6fdf;
+  --radius-lg: 22px;
+  --radius-sm: 10px;
+  --font-head: "Jua", "Noto Sans CJK KR", "Apple SD Gothic Neo", sans-serif;
+  --font-body: "Gowun Dodum", "Noto Sans CJK KR", "Apple SD Gothic Neo", sans-serif;
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 18px;
+  line-height: 1.65;
+}
+h1, h2, h3 { font-family: var(--font-head); font-weight: 400; line-height: 1.25; margin: 0 0 .4em; }
+a { color: var(--focus); }
+button { font: inherit; color: inherit; }
+:focus-visible { outline: 3px solid var(--focus); outline-offset: 3px; }
+
+/* 상단 띠: 어느 화면인지 + 처음으로 */
+.topbar {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  padding: 14px 24px; border-bottom: 2px solid var(--line); background: #fff;
+}
+.topbar .brand { font-family: var(--font-head); font-size: 1.25rem; text-decoration: none; color: var(--ink); }
+.topbar .where { color: var(--ink-soft); font-size: .95rem; }
+
+.wrap { max-width: 1080px; margin: 0 auto; padding: 28px 20px 60px; }
+
+/* 버튼 */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  min-height: 48px; padding: 10px 20px; border-radius: 999px;
+  border: 2px solid var(--ink); background: #fff; cursor: pointer;
+  font-family: var(--font-head); font-size: 1.05rem;
+}
+a.btn { text-decoration: none; color: var(--ink); }
+.btn:hover { background: var(--sky); }
+.btn.primary { background: var(--ink); color: #fff; }
+.btn.primary:hover { background: #2c3b63; }
+.btn[disabled] { opacity: .4; cursor: not-allowed; }
+
+/* 사다리 칸 색 */
+.rung0 { --c: var(--rung0); }
+.rung1 { --c: var(--rung1); }
+.rung2 { --c: var(--rung2); }
+.rung3 { --c: var(--rung3); }
+
+/* 안전 안내 */
+.safety { margin-top: 28px; padding: 14px 18px; border-left: 6px solid var(--rung2); background: #eef7f6; border-radius: 0 var(--radius-sm) var(--radius-sm) 0; font-size: .95rem; }
+.safety ul { margin: 4px 0 0; padding-left: 1.2em; }
+
+.footer { margin-top: 40px; color: var(--ink-soft); font-size: .85rem; }
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; transition: none !important; }
+}
