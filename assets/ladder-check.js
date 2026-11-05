@@ -1,63 +1,62 @@
 /* =========================================================
-   마음 사다리 · 칸별 규칙 판정 (서버·AI 없이 기기 안에서만 동작)
-   - 볼 수 있는 것: 물음표, "~구나" 단정, 질문 모양(열린 질문 / 응·아니 질문), 감정 낱말 수, 도움 낱말, 개수
-   - 1층과 2층은 감정 낱말 목록이 아니라 '질문 모양'으로 가른다.
-     (목록에 없는 짐작 "속이 안 좋아?" "힘들어?"도 1층으로 인정)
-   - 볼 수 없는 것: 말이 얼마나 따뜻한지 → 짝·관찰자·선생님이 봐요
+   마음 사다리 · 칸별 규칙 판정 (v3 '사실이·기분이' 사다리)
+   - 서버·AI 없이 기기 안에서만 동작합니다.
+   - 1층 사실이: 친구 첫말 속 사실 낱말이 들어 있고, 확인하는 말("~라는 말이지?")로 맺었는가
+   - 2층 기분이: 기분 낱말로 마음을 알아주거나, 기분을 묻는가
+   - 3층 도움 묻기: 도움 낱말 + 물음표, 정해 버리지 않았는가
+   - 볼 수 없는 것: 말이 얼마나 따뜻한지, 장단이 자세 → 관찰자·짝·선생님이 봐요
    ========================================================= */
 
 const LadderCheck = (() => {
   // 감정 낱말 묶음 (같은 묶음은 한 개로 셈)
   const FEELS = [
     /(^|[^대])화\s*(가\s*)?(나|났|난|낼)/, /짜증/, /슬(프|퍼|픈|펐)/, /속상/, /아(프|파|픈)/, /졸(려|리|린)|피곤/,
-    /긴장|떨(려|리|린)/, /귀찮/, /서운|섭섭/, /실망/, /쑥스|부끄|창피/, /기분\s*(이\s*)?(나쁘|나빠|나쁜|안\s*좋)/,
-    /싫(?!으면|다면)/, /불안/, /아쉽|아쉬/, /심심/, /당황/, /억울/, /걱정/, /외로|쓸쓸/, /부럽|부러|질투/,
-    /미안/, /무섭|무서|겁|두렵|두려/, /설레|설렘|신나|신난|기뻐|기쁘|기쁜|행복|즐겁|즐거/, /우울|울적/, /놀라|놀랐/,
+    /긴장|떨(려|리|린|렸)/, /귀찮/, /서운|섭섭/, /실망/, /쑥스|부끄|창피/, /기분\s*(이\s*)?(나쁘|나빠|나쁜|안\s*좋)/,
+    /싫(?!으면|다면)/, /불안/, /아쉽|아쉬/, /심심/, /당황/, /억울/, /걱정/, /외로|외롭|쓸쓸/, /부럽|부러|질투/,
+    /미안/, /무섭|무서|겁|두렵|두려/, /설레|설렘|신나|신난|기뻐|기쁘|기쁜|행복|즐겁|즐거|들뜨|들떠/, /우울|울적/, /놀라|놀랐/,
     /(속|마음)\s*(이\s*)?안\s*좋/, /힘(들|드|든)|지(쳤|친|치)/, /답답|불편|부담|초조|조마조마/,
     /서럽|서러|상처|미워/, /민망|무안/, /그립|그리워|허전/, /샘\s*(나|난)|약\s*(올라|오르)|분(하|해)|열\s*받|삐(졌|친|져|쳐)|토라/,
     /뿌듯|고마|반가|감동|후련|안심|편안/, /재밌|재미|웃겨|웃긴/, /배\s*(가\s*)?(고파|고프)/
   ];
-  // 답을 열어 둔 질문(2층) 표지: 어떤·무슨·왜·어때·말해 줄래 등
-  const OPEN = /(어떤|어떻|어때|어땠|무슨|무엇|뭐|뭘|왜|웬일|(말|얘기|이야기)\s*해\s*(줄|주|줘)|들려\s*(줄|주|줘))/;
   const ASK_HELP = /(도와|도움|도울|해\s*줄|해줄|해\s*주면|해주면|필요|원하|바라|뭘\s*해|무엇을\s*해|뭐\s*해)/;
   const DECIDE = /(줄게|줄께|할게|할께|해\s*줄게)/;
-  // "말해 줄래?"는 마음을 묻는 말이므로 도움 낱말에서 뺀다
-  const asksHelp = (t) => ASK_HELP.test(t.replace(/(말|얘기|이야기)\s*해\s*(줄|주|줘)/g, ""));
+  // 듣기 전에 정해 버리는 말(판단·무시·훈계)의 흔한 표지
+  const CUT = /(별거|별것|그냥\s*(해|참|주워|넘어|대충)|대충\s*해|원래|조심\s*(좀|했어야)|했어야지|해야지|신경\s*쓰지\s*마|빨리\s*(해|봐|옮겨)|조용히\s*해|그러게)/;
+  // 답을 열어 둔 질문 표지
+  const OPEN = /(어떤|어떻|어때|어땠|무슨|무엇|뭐|뭘|왜|웬일|(말|얘기|이야기)\s*해\s*(줄|주|줘)|들려\s*(줄|주|줘))/;
 
   const clean = (t) => (t || "").replace(/\s+/g, " ").trim();
   const hasQ = (t) => /[?？][\s"'”’)]*$/.test(t);
-  const feelCount = (t) => FEELS.filter((re) => re.test(t)).length;
   const feelIds = (t) => FEELS.map((re, k) => (re.test(t) ? k : -1)).filter((k) => k >= 0);
-  const isJudge = (t) => /구나[.!\s"'”’]*$|구나[.!]/.test(t) && !hasQ(t);
-
+  const feelCount = (t) => feelIds(t).length;
+  const asksHelp = (t) => ASK_HELP.test(t.replace(/(말|얘기|이야기)\s*해\s*(줄|주|줘)/g, ""));
   const R = (ok, msg, code) => ({ ok, msg, code });
 
-  // 1층: 짐작을 질문으로
-  function rung1(text) {
+  // 1층 사실이: 들은 말 되짚기
+  function fact(text, card) {
     const t = clean(text);
     if (!t) return R(false, "한 문장을 써 보세요.", "empty");
-    if (isJudge(t)) return R(false, "'~구나.'는 아직 단정하는 말이에요. 짐작한 마음 끝에 물음표를 붙여 질문으로 바꿔요.", "judge");
-    if (!hasQ(t)) return R(false, "끝에 물음표(?)를 붙여 질문으로 만들어요.", "noq");
-    const f = feelCount(t);
-    if (f >= 2) return R(false, "마음을 여러 개 보기로 주었어요. 짐작한 마음 하나만 넣어 물어봐요.", "options");
-    if (f === 0 && asksHelp(t)) return R(false, "도움을 묻는 말은 3층이에요. 1층은 내가 짐작한 마음을 넣어 물어요.", "help");
-    if (f === 0 && OPEN.test(t)) return R(false, "답을 열어 둔 질문이에요. 그건 2층이에요. 1층은 '혹시 ○○니?'처럼 내가 짐작한 마음을 넣어 물어요.", "open");
-    if (f === 0 && /^(너\s*)?(혹시\s*)?(괜찮|괜챦)(아|니|지|으세요)\s*[?？]$/.test(t)) return R(false, "'괜찮아?'에는 내 짐작이 들어 있지 않아요. 친구가 어떤 마음일 것 같은지 넣어 물어봐요.", "nofeel");
-    return R(true, "짐작을 질문으로 바꿨어요. 이제 친구가 '맞아' 또는 '아니야'라고 답할 수 있어요.", "ok");
+    if (CUT.test(t)) return R(false, "판단이나 충고가 들어 있어요. 그건 출발 칸의 말이에요. 친구가 한 말만 되짚어요.", "cut");
+    if (asksHelp(t)) return R(false, "도움을 묻는 말은 3층이에요. 먼저 친구가 한 말을 되짚어요.", "help");
+    const own = feelIds(clean(card.first));
+    if (feelIds(t).some((k) => !own.includes(k))) return R(false, "기분을 말했네요. 그건 2층(기분이)이에요. 먼저 친구가 한 말의 사실만 되짚어요.", "feel");
+    if (!card.factKeys.some((k) => t.includes(k))) return R(false, "친구가 한 말을 다시 짚어 줘요. 친구가 말한 낱말을 넣어 '~라는 말이지?'처럼요.", "nofact");
+    if (!hasQ(t) && !/구나[.!\s]*$/.test(t)) return R(false, "끝을 '~라는 말이지?'처럼 확인하는 말로 맺어요.", "noq");
+    return R(true, "들은 말을 되짚었어요. 친구는 '내 말을 듣고 있구나' 하고 느껴서 더 이야기할 수 있어요.", "ok");
   }
 
-  // 2층: 마음을 직접 묻기
-  function rung2(text) {
+  // 2층 기분이: 마음 알아주기 (말해 주기 또는 묻기)
+  function feel(text) {
     const t = clean(text);
     if (!t) return R(false, "한 문장을 써 보세요.", "empty");
-    if (isJudge(t)) return R(false, "'~구나.'는 단정하는 말이에요. 친구에게 물어봐요.", "judge");
-    if (!hasQ(t)) return R(false, "끝에 물음표(?)를 붙여 물어봐요.", "noq");
-    if (asksHelp(t)) return R(false, "도움을 묻는 말은 3층이에요. 먼저 친구의 마음을 물어봐요.", "help");
+    if (CUT.test(t)) return R(false, "판단이나 충고가 들어 있어요. 친구의 기분을 알아주는 말로 바꿔요.", "cut");
     const f = feelCount(t);
-    if (f >= 2) return R(false, "'○○해, ○○해?'처럼 보기를 주었어요. 답을 정하지 말고 친구가 말하게 해요.", "options");
-    if (f === 1) return R(false, "짐작한 마음이 들어 있어요. 그건 1층 질문이에요. 내 짐작을 빼고 물어봐요.", "feel");
-    if (!OPEN.test(t)) return R(false, "'응/아니'로만 답하게 되는 질문이에요. 그건 1층에 가까워요. '어떤', '무슨', '왜'처럼 친구가 스스로 말할 수 있게 물어봐요.", "yesno");
-    return R(true, "답을 정하지 않고 물었어요. 이제 친구가 자기 마음을 직접 말할 수 있어요.", "ok");
+    if (f >= 2 && /아니면/.test(t)) return R(false, "'○○해, 아니면 ○○해?'처럼 보기를 주었어요. 들은 말에서 읽은 기분 하나를 말해 주거나 기분을 물어봐요.", "options");
+    if (f >= 1) return R(true, "들은 말에서 기분을 읽어 말해 줬어요. 맞으면 친구가 '응' 하고, 다르면 바로잡아 줄 거예요.", "ok");
+    if (/(기분|마음|느낌)/.test(t) && OPEN.test(t)) return R(true, "친구의 기분을 물었어요. 이제 친구가 자기 기분을 직접 말할 수 있어요.", "ok-ask");
+    if (asksHelp(t)) return R(false, "도움을 묻는 말은 3층이에요. 먼저 친구의 기분을 알아줘요.", "help");
+    if (/(그랬구나|그렇구나|그랬어\?|정말\?|진짜\?)/.test(t)) return R(false, "'그랬구나'는 좋은 맞장구(장단이)예요. 한 걸음 더: 들은 말에서 읽은 기분을 넣어 '~해서 ~하겠다'처럼 말해 줘요.", "nod");
+    return R(false, "기분이 들어 있지 않아요. '~해서 ~하겠다'처럼 기분을 말해 주거나, '그때 기분이 어땠어?'처럼 물어봐요.", "nofeel");
   }
 
   // 3층: 도움 묻기
@@ -71,7 +70,6 @@ const LadderCheck = (() => {
   }
 
   // 도울 방법: 세 가지 이상 + 기준 세 가지 점검
-  //  items: [{ text, checks: [bool, bool, bool] }]
   function helps(items) {
     const filled = items.map((x, k) => ({ ...x, k, text: clean(x.text) })).filter((x) => x.text.length >= 2);
     const uniq = [...new Map(filled.map((x) => [x.text.replace(/\s/g, ""), x])).values()];
@@ -84,17 +82,19 @@ const LadderCheck = (() => {
     return R(true, `세 가지 기준을 지킨 도울 방법 ${checked.length}가지를 찾았어요.`, "ok");
   }
 
-  // 짐작이 비밀 마음과 같은지 (1층 대답을 고를 때)
   const sameFeel = (text, card) => card.feelKeys.some((k) => clean(text).includes(k));
-
-  // 1층 질문에 대한 친구의 대답 고르기
-  //  비밀 마음과 같으면 "응, 맞아", 흔한 짐작과 같으면 카드의 대답, 그 밖이면 짧게 아니라고
-  function reply1(text, card) {
-    if (sameFeel(text, card)) return "응, 맞아. 어떻게 알았어?";
-    const mine = feelIds(clean(text)), common = feelIds(card.check);
-    if (mine.some((k) => common.includes(k))) return card.checkReply;
-    return "음… 그건 아니야.";
+  // 2층 대답: 기분을 물었거나 맞게 알아주면 feelYes, 다르게 말하면 친구가 바로잡음(feelNo)
+  // 넓게 말한 기분(힘들다, 기분이 안 좋다 등)은 틀린 게 아니라 친구가 더 자세히 말해 줌
+  const BROAD = /(힘들|힘드|힘든|지쳤|지친|(속|마음|기분)\s*(이\s*)?(안\s*좋|별로|나쁘|나빠))/;
+  const core = (s) => s.replace(/^응\s*[,…!.]?\s*(맞아\s*[.…!]?\s*)?/, "");
+  function replyFeel(text, card) {
+    const t = clean(text);
+    if (feelCount(t) === 0) return core(card.feelYes);                 // 기분을 물었으면 친구가 직접 말함
+    if (sameFeel(t, card)) return card.feelYes;
+    const ids = feelIds(t);
+    if (BROAD.test(t) && ids.length === 1) return "응, 그런 것도 있어. 사실은 " + core(card.feelYes);
+    return card.feelNo;                                               // 다르게 말하면 친구가 바로잡음
   }
 
-  return { rung1, rung2, rung3, helps, sameFeel, reply1, feelCount, feelIds, hasQ };
+  return { fact, feel, rung3, helps, sameFeel, replyFeel, feelCount, feelIds, hasQ };
 })();
