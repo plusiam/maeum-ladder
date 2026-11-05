@@ -1,0 +1,60 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 560 280" width="560" height="280" role="presentation" aria-hidden="true">
+  <!-- 마음 사다리 첫 화면 그림: 마주 보는 두 친구. 왼쪽 친구가 말하고, 오른쪽 친구가 고개를 끄덕이며 들어요.
+       말이 노랑(되짚기) → 청록(알아주기) → 초록(묻기) 방울로 한 칸씩 올라가요. 직접 그린 그림(저작권 문제 없음). -->
+  <defs>
+    <clipPath id="panel"><rect width="560" height="280" rx="28"/></clipPath>
+    <path id="spark" d="M0 -9 C1.5 -2 2 -1.5 9 0 C2 1.5 1.5 2 0 9 C-1.5 2 -2 1.5 -9 0 C-2 -1.5 -1.5 -2 0 -9 Z"/>
+  </defs>
+  <rect width="560" height="280" rx="28" fill="#e7eff8"/>
+  <g clip-path="url(#panel)" stroke="#1e2a4a" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+    <!-- 바닥 -->
+    <ellipse cx="280" cy="300" rx="300" ry="44" fill="#fbfbf8" stroke="none"/>
+
+    <!-- 왼쪽 친구 (말하는 친구) -->
+    <path d="M92 290 V242 Q92 204 150 204 Q208 204 208 242 V290 Z" fill="#f2b544"/>
+    <path d="M132 206 Q150 222 168 206" fill="none"/>
+    <circle cx="150" cy="158" r="40" fill="#f0c9a0"/>
+    <path d="M110 160 Q106 114 150 114 Q194 114 191 152 Q181 136 162 134 Q140 132 126 144 Q116 151 110 160 Z" fill="#1e2a4a"/>
+    <circle cx="161" cy="162" r="3.6" fill="#1e2a4a" stroke="none"/>
+    <circle cx="180" cy="162" r="3.6" fill="#1e2a4a" stroke="none"/>
+    <ellipse cx="176" cy="181" rx="4.5" ry="3.2" fill="#1e2a4a" stroke="none"/>
+    <circle cx="148" cy="176" r="6" fill="#f2b544" opacity=".35" stroke="none"/>
+
+    <!-- 오른쪽 친구 (들어 주는 친구, 고개를 기울여 끄덕임) -->
+    <path d="M352 290 V242 Q352 204 410 204 Q468 204 468 242 V290 Z" fill="#3fa7a0"/>
+    <path d="M392 206 Q410 222 428 206" fill="none"/>
+    <g transform="rotate(-9 410 160)">
+      <circle cx="458" cy="146" r="15" fill="#55607d"/>
+      <circle cx="410" cy="160" r="40" fill="#b9825a"/>
+      <path d="M369 160 Q366 114 410 114 Q454 114 451 160 Q444 140 424 136 Q400 132 384 144 Q374 151 369 160 Z" fill="#55607d"/>
+      <path d="M381 163 q5.5 -6 11 0" fill="none"/>
+      <path d="M399 163 q5.5 -6 11 0" fill="none"/>
+      <path d="M390 180 q7 6 14 0" fill="none"/>
+      <circle cx="414" cy="176" r="6" fill="#f2b544" opacity=".3" stroke="none"/>
+    </g>
+    <!-- 끄덕끄덕 -->
+    <path d="M352 128 q-9 12 0 24" fill="none" stroke="#3fa7a0"/>
+    <path d="M340 120 q-14 20 0 40" fill="none" stroke="#3fa7a0"/>
+
+    <!-- 말이 한 칸씩 올라가요: 되짚기 → 알아주기 → 묻기 -->
+    <circle cx="198" cy="144" r="4" fill="#f2b544"/>
+    <circle cx="210" cy="131" r="5.5" fill="#f2b544"/>
+    <circle cx="238" cy="110" r="23" fill="#f2b544"/>
+    <path d="M247 104 A10 10 0 1 0 248 114" fill="none" stroke="#fff" stroke-width="3.5"/>
+    <path d="M241 101 L248 103 L246 110" fill="none" stroke="#fff" stroke-width="3.5"/>
+
+    <circle cx="268" cy="86" r="4" fill="#3fa7a0"/>
+    <circle cx="304" cy="68" r="28" fill="#3fa7a0"/>
+    <path d="M304 82 C290 72 288 60 296 56 C301 53 304 57 304 61 C304 57 307 53 312 56 C320 60 318 72 304 82 Z" fill="#fff" stroke="none"/>
+
+    <circle cx="341" cy="46" r="4" fill="#5fae4e"/>
+    <circle cx="384" cy="46" r="31" fill="#5fae4e"/>
+    <path d="M374 39 Q374 27 384 27 Q395 27 395 37 Q395 45 388 48 Q384 50 384 56" fill="none" stroke="#fff" stroke-width="4.5"/>
+    <circle cx="384" cy="65" r="3.2" fill="#fff" stroke="none"/>
+  </g>
+  <!-- 반짝 -->
+  <use href="#spark" transform="translate(486 70)" fill="#f2b544"/>
+  <use href="#spark" transform="translate(516 112) scale(.6)" fill="#f2b544"/>
+  <use href="#spark" transform="translate(70 70) scale(.75)" fill="#5fae4e"/>
+  <use href="#spark" transform="translate(98 40) scale(.5)" fill="#3fa7a0"/>
+</svg>
