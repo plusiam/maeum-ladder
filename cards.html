@@ -48,10 +48,10 @@
     .tip { margin-top: 8px; padding: 8px 12px; background: #eef7f6; border-left: 6px solid var(--rung2); border-radius: 0 8px 8px 0; }
     .rnd { border: 2px solid var(--ink); border-radius: 10px; padding: 8px 12px 10px; margin-top: 9px; }
     .rnd .top { display: grid; grid-template-columns: 84px 1fr 1fr 124px; gap: 10px; align-items: end; }
-    .ln { border-bottom: 1.5px solid var(--ink); min-height: 36px; display: flex; align-items: flex-end; gap: 6px; font-size: 12px; white-space: nowrap; }
+    .ln { border-bottom: 1.5px solid var(--ink); min-height: 32px; display: flex; align-items: flex-end; gap: 6px; font-size: 12px; white-space: nowrap; }
     .ln i { font-style: normal; color: var(--ink-soft); white-space: nowrap; }
     .rnd .hl { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 6px; }
-    .rnd .hl .ln { min-height: 40px; }
+    .rnd .hl .ln { min-height: 36px; }
     .rnd .wish { margin-top: 8px; }
     .foot { margin-top: auto; font-size: 10.5px; color: var(--ink-soft); display: flex; justify-content: space-between; }
     .full .foot { margin-top: 8px; }
@@ -84,21 +84,21 @@
     // ---------- 마음 친구 카드 (반 쪽) ----------
     function card(c) {
       const rows = [
-        [0, "\"너 ~구나.\"처럼 단정하면", c.judgeReply],
-        [1, "\"혹시 ~니?\"처럼 짐작을 물으면", `비밀 마음을 맞히면 “응, 맞아.” · 흔한 짐작이면 “${c.checkReply}” · 그 밖의 짐작이면 “음… 그건 아니야.”`],
-        [2, "\"지금 어떤 마음이야?\"처럼 물으면", c.reveal],
-        [3, "\"어떻게 도와줄까?\"처럼 물으면", c.want]
-      ].map(([k, hear, reply]) => `<tr><td class="k" style="--c:var(--${COLORS[k]})">${LADDER[k].name}</td><td>${hear}</td><td class="say">“${reply.replace(/^“|”$/g, "")}”</td></tr>`).join("");
+        [1, "\"~라는 말이지?\"처럼 내 말을 되짚으면", `“${c.factReply}”`],
+        [2, "내 기분을 말해 주거나 물으면", `맞게 알아주거나 물으면 “${c.feelYes}” · 다른 기분을 말하면 “${c.feelNo}”`],
+        [3, "\"어떻게 도와줄까?\"처럼 물으면", `“${c.want}”`]
+      ].map(([k, hear, reply]) => `<tr><td class="k" style="--c:var(--${COLORS[k]})">${LADDER[k].name}</td><td>${hear}</td><td class="say">${reply}</td></tr>`).join("");
+      const firstRow = `<tr><td class="k" style="--c:var(--ink)">시작</td><td>먼저 이렇게 말해요</td><td class="say">“${c.first}”</td></tr>`;
+      const cutRow = `<tr><td class="k" style="--c:var(--rung0)">${LADDER[0].name}</td><td>“${c.cut}”처럼 정해 버리거나 칸에 안 맞으면</td><td>말없이 고개를 젓고 기다려요. 관찰자가 힌트를 줘요.</td></tr>`;
       return `<article class="card">
         <header class="head"><div class="no">${c.n}</div>
           <div><h1>${c.who} · 마음 친구 카드</h1><p>${c.view}</p></div>
           <span class="secret">다른 친구에게 보여 주지 않아요</span></header>
         <div class="feelrow">
           <div class="box"><b>비밀 마음</b><div class="feel">${c.feel}</div></div>
-          <div class="box"><b>친구들이 흔히 할 짐작</b><br>${c.guess}<br><span style="color:var(--ink-soft);font-size:11px">짐작이 맞아도, 칸에 맞게 물어야 다음 대답을 해요.</span></div>
+          <div class="box"><b>그림만 보고 흔히 할 짐작</b><br>${c.guess}<br><span style="color:var(--ink-soft);font-size:11px">비밀 마음은 2층(기분이)까지 와야 말해요.</span></div>
         </div>
-        <table><thead><tr><th>사다리 칸</th><th>이런 말을 들으면</th><th>이렇게 대답해요</th></tr></thead><tbody>${rows}
-          <tr><td class="k" style="--c:var(--ink)">칸에 안 맞으면</td><td colspan="2">말없이 고개를 저어요. 관찰자가 힌트를 줘요.</td></tr></tbody></table>
+        <table><thead><tr><th>사다리 칸</th><th>이런 말을 들으면</th><th>이렇게 대답해요</th></tr></thead><tbody>${firstRow}${rows}${cutRow}</tbody></table>
         <div class="box"><b>도울 방법을 들으면</b> 가장 마음에 드는 방법에 ★을 그려요. 내 바람과 닮은 방법이면 “그거 좋아!”<br>
           <span style="color:var(--ink-soft)">이런 방법도 좋아요: ${c.helps.join(" · ")}</span></div>
         <ul class="rules">${ACTOR_RULES.map(r => `<li>${r}</li>`).join("")}</ul>
@@ -110,7 +110,9 @@
     function observe() {
       return `<article class="page full obs" data-k="obs">
         <header class="head"><div class="no" style="font-size:18px">관찰</div>
-          <div><h1>사다리 관찰 카드</h1><p class="lead">말 거는 친구가 칸에 맞게 말했는지 확인하고, 막히면 힌트를 하나 줘요.</p></div></header>
+          <div><h1>사다리 관찰 카드</h1><p class="lead">들어 주는 친구가 장단이 자세로 듣고, 칸에 맞게 대답했는지 확인해요. 막히면 힌트를 하나 줘요.</p></div></header>
+        <h2>모든 칸에서: 장단이 자세</h2>
+        <div class="crit">${BASE_CHECK.map(q => `<span>□ ${q}</span>`).join("")}</div>
         <h2>칸마다 확인할 것 (아래 출발 칸부터 위로)</h2>
         <table><thead><tr><th>사다리 칸</th><th>이렇게 말했나요?</th><th>이런 말은 다시</th><th>힌트</th><th style="width:9%">통과</th></tr></thead>
           <tbody>${OBSERVE.slice().reverse().map(o => `<tr><td class="k" style="--c:var(--${COLORS[o.step]})">${LADDER[o.step].name}</td>
@@ -118,12 +120,12 @@
         <h2>도울 방법을 점검할 때 (조가 함께)</h2>
         <div class="crit">${HELP_RULE.map(q => `<span>${q}</span>`).join("")}</div>
         <p class="lead">세 가지에 모두 “네”인 방법만 조 기록지에 적어요. 친구의 바람을 바탕으로 세 가지 이상!</p>
-        <div class="tip"><b>관찰자 약속</b><br>· 말 거는 친구의 말이 칸에 맞는지만 봐요. 놀리거나 대신 말해 주지 않아요.<br>· 힌트는 한 번에 하나만. 몇 번을 다시 해도 괜찮아요.<br>· ${WATCHER_WRITES}</div>
+        <div class="tip"><b>관찰자 약속</b><br>· 들어 주는 친구의 말이 칸에 맞는지만 봐요. 놀리거나 대신 말해 주지 않아요.<br>· 힌트는 한 번에 하나만. 몇 번을 다시 해도 괜찮아요.<br>· ${WATCHER_WRITES}</div>
         <h2>역할 돌리기</h2>
         <table><thead><tr><th>자리</th><th>1라운드</th><th>2라운드</th><th>3라운드</th><th>4라운드</th></tr></thead><tbody>
           ${["A", "B", "C", "D"].map((s, i) => `<tr><td class="k" style="--c:var(--ink)">${s}</td>${[1, 2, 3, 4].map(r => `<td>${ROLES[(i + r - 1) % 4].name}</td>`).join("")}</tr>`).join("")}
         </tbody></table>
-        <p class="lead">4인조 기준이에요. 3인조는 칠판 화면의 자리별 역할을 따라요. (마음 친구 → 말 거는 친구 → 관찰자 순서로 돌아요)</p>
+        <p class="lead">4인조 기준이에요. 3인조는 칠판 화면의 자리별 역할을 따라요. (마음 친구 → 들어 주는 친구 → 관찰자 순서로 돌아요)</p>
         ${footer("관찰 카드")}
       </article>`;
     }
@@ -132,9 +134,10 @@
     function record() {
       const rnd = (r) => `<div class="rnd">
         <div class="top"><div class="ln"><i>${r}라운드</i> __번</div>
-          <div class="ln"><i>출발 칸에서 짐작한 마음</i></div>
-          <div class="ln"><i>물어서 확인한 마음</i></div>
+          <div class="ln"><i>그림만 보고 짐작한 마음</i></div>
+          <div class="ln"><i>듣고 확인한 진짜 기분</i></div>
           <div class="ln"><i>같았나요?</i> ○ / ×</div></div>
+        <div class="ln wish"><i>사실이로 되짚은 친구의 말</i></div>
         <div class="ln wish"><i>3층에서 들은 친구의 바람</i></div>
         <div class="hl"><div class="ln"><i>도울 방법 1</i></div><div class="ln"><i>2</i></div><div class="ln"><i>3</i></div></div>
       </div>`;
@@ -144,7 +147,7 @@
           <span class="secret">______ 조</span></header>
         ${[1, 2, 3, 4].map(rnd).join("")}
         <h2>우리 조가 알게 된 것</h2>
-        <div class="rnd"><div class="ln" style="min-height:30px"><i>짐작한 마음과 확인한 마음은</i></div><div class="ln" style="min-height:30px"></div></div>
+        <div class="rnd"><div class="ln" style="min-height:30px"><i>그림만 보고 짐작한 마음과 듣고 확인한 기분은</i></div><div class="ln" style="min-height:30px"></div></div>
         ${footer("조 기록지")}
       </article>`;
     }

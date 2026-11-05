@@ -163,11 +163,11 @@
     <section id="wrapView" class="hidden">
       <div class="wrapup" id="wrap1">
         <span class="stage-tag" style="justify-self:center">정리 1 · 함께 생각하기</span>
-        <p class="q">짐작한 마음과 확인한 마음은<br>같았나요? 무엇이 달랐나요?</p>
-        <p class="sub">조 기록지의 ○ / × 를 보며 이야기해요.</p>
+        <p class="q">그림만 보고 짐작한 마음과<br>듣고 확인한 기분은 같았나요?</p>
+        <p class="sub">조 기록지의 ○ / × 를 보며 이야기해요. 사실이·기분이가 무엇을 바꿨나요?</p>
         <div class="think">
-          <div class="rung0" style="--c:var(--rung0)"><b>짐작만 했을 때</b>그림의 단서로 마음을 정했어요.</div>
-          <div class="rung2" style="--c:var(--rung2)"><b>물어서 확인했을 때</b>친구가 진짜 마음과 까닭을 말해 주었어요.</div>
+          <div class="rung0" style="--c:var(--rung0)"><b>그림만 보고 짐작했을 때</b>단서로 마음을 정했어요. 틀려도 알 수 없었어요.</div>
+          <div class="rung2" style="--c:var(--rung2)"><b>듣고 되짚었을 때</b>친구가 사실을 더 말해 주고, 기분이 다르면 바로잡아 주었어요.</div>
         </div>
         <div class="center"><button class="btn primary" id="wrapNext">정리 화면 보기</button></div>
       </div>
@@ -175,7 +175,7 @@
         <span class="stage-tag" style="justify-self:center">정리 2 · 우리가 오른 사다리</span>
         <div class="big-ladder" id="wrapLadder"></div>
         <p class="gen" id="gen"></p>
-        <p class="sub">이제 <b>3단계</b>: 태블릿으로 새 친구에게 혼자 사다리를 올라 확인해요.</p>
+        <p class="sub">모든 칸에서 <b>장단이 자세</b>(눈 맞추기 · 끄덕이기 · 끝까지 듣기)<br>이제 <b>3단계</b>: 태블릿으로 새 친구의 첫말에 혼자 대답하며 확인해요.</p>
         <div class="center"><a class="btn primary" href="ladder.html">3단계 확인으로</a><button class="btn" id="wrapBack">상황 고르기로</button></div>
       </div>
     </section>
@@ -207,6 +207,7 @@
         : "<b>라운드가 끝나면</b><br>칠판의 자리별 역할을 보고 한 칸씩 바꿔요.<br>새 그림 · 새 친구로 다시!"}</div>` + rolesFor(1).map(x => `<div class="role" style="--c:var(--${x.role.color})"><b>${x.seat} · ${x.role.name}</b><span>1라운드</span></div>`).join("");
       if (show === "roles") return ROLES.map(r => `<div class="role" style="--c:var(--${r.color})"><b>${r.name}</b><span>${r.job}</span></div>`).join("") + `<div class="note-box" style="font-size:1rem">${WATCHER_WRITES}</div>`;
       if (show === "ladder") return `<div class="big-ladder">${ladderHTML()}</div>`;
+      if (show === "base") return `<div class="note-box"><b>${BASE.name}</b><br>${BASE.hint}</div>` + BASE_CHECK.map(q => `<div class="role" style="--c:var(--rung1)"><b>장단이</b><span>${q}</span></div>`).join("");
       if (show === "hint") return OBSERVE.map((o, k) => `<div class="role" style="--c:var(--${LADDER[k].color})"><b>${LADDER[k].short}</b><span>막히면: “${o.hint}”</span></div>`).join("");
       if (show === "help") return `<div class="note-box"><b>3층에서 들은 친구의 바람</b><br>→ 조가 함께 도울 방법 <b>세 가지 이상</b><br>→ 마음 친구가 가장 마음에 드는 방법에 ★</div>` + HELP_RULE.map(q => `<div class="role" style="--c:var(--rung3)"><b>점검</b><span>${q}</span></div>`).join("");
       return "";
@@ -275,7 +276,7 @@
     function openRound(n) {
       cur = GAME_CARDS.find(c => c.n === n);
       showView("playView", `2단계 역할극 · ${cls.round}라운드`);
-      $("callText").textContent = `${cls.round}라운드 · 마음 친구는 ${n}번 카드를 펴요 (다른 친구에게 보여 주지 않아요)`;
+      $("callText").textContent = `${cls.round}라운드 · 마음 친구는 ${n}번 카드를 펴고 첫말을 해요 (카드는 보여 주지 않아요)`;
       drawPicture();
       $("seatTitle").textContent = `${cls.round}라운드 자리별 역할`;
       $("seats").innerHTML = rolesFor(cls.round).map(x => `<div class="seat" style="--c:var(--${x.role.color})"><span class="s">${x.seat}</span>
