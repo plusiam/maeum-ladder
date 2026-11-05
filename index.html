@@ -7,11 +7,9 @@
   <meta name="description" content="짐작에서 확인으로: 룰루랄라 한기쌤의 공감 대화 수업 도구 (연습 · 역할극 · 확인)">
   <link rel="stylesheet" href="assets/style.css">
   <style>
-    .hero { display: grid; grid-template-columns: 1fr 1.08fr; gap: 28px; align-items: center; padding: 6px 0 0; }
-    .hero-art { display: block; width: 100%; height: auto; }
-    .ladder-sec { margin-top: 34px; display: grid; grid-template-columns: 1fr 1.4fr; gap: 28px; align-items: center; }
-    .ladder-sec h2 { font-size: 1.6rem; margin: 0 0 6px; }
-    .ladder-sec p { margin: 0; color: var(--ink-soft); }
+    .hero { display: grid; grid-template-columns: 1.1fr 1fr; gap: 28px; align-items: center; padding: 6px 0 0; }
+    .titlerow { display: flex; align-items: center; justify-content: space-between; gap: 14px; }
+    .titlerow h1 { flex: 0 0 auto; }
     .hero-illus { display: block; flex: 0 1 250px; min-width: 0; height: auto; margin: 0 0 6px; }
     @media (max-width: 520px) { .titlerow { flex-wrap: wrap; } .hero-illus { flex-basis: 100%; max-width: 260px; margin-bottom: 12px; } .join { flex-wrap: wrap; } .join > div { min-width: 0; } .join .url { word-break: break-all; } }
     .hero h1 { font-size: clamp(2.6rem, 6vw, 4.2rem); margin-bottom: .15em; }
@@ -56,9 +54,17 @@
     .teacher-link { text-align: right; margin-top: 18px; }
     .teacher-link a { color: var(--ink-soft); font-size: .9rem; }
     @media (max-width: 900px) {
-      .hero, .steps, .ladder-sec { grid-template-columns: 1fr; }
-      .hero { gap: 10px; }
-      .hero-art { max-width: 520px; margin: 0 auto; }
+      .hero, .steps { grid-template-columns: 1fr; }
+      /* 세로 화면: 제목 → [연습 시작]이 있는 단계 카드 → 사다리 → QR 순서로, 시작 단추를 먼저 보여 줘요 */
+      main.wrap { display: flex; flex-direction: column; }
+      .hero { display: contents; }
+      .hero > div:first-child { order: 1; }
+      .steps { order: 2; margin-top: 22px; }
+      .hero .ladder { order: 3; margin-top: 26px; }
+      .join { order: 4; }
+      .safety { order: 5; }
+      .teacher-link { order: 6; }
+      .hero-illus { flex-basis: 260px; }
     }
   </style>
 </head>
@@ -71,12 +77,15 @@
   <main class="wrap">
     <section class="hero">
       <div>
-        <h1>마음 사다리</h1>
+        <div class="titlerow">
+          <h1>마음 사다리</h1>
+          <img class="hero-illus" src="assets/hero-talk.webp" width="1200" height="600" alt="" aria-hidden="true">
+        </div>
         <p class="sub" id="subtitle"></p>
         <div class="inquiry"><b>오늘의 탐구질문</b><p id="inquiry"></p></div>
         <p class="basehint" id="basehint"></p>
       </div>
-      <img class="hero-art" src="assets/hero-talk.webp" width="1200" height="600" alt="" aria-hidden="true">
+      <div class="ladder" id="ladder" aria-label="질문 사다리 네 칸"></div>
     </section>
 
     <div class="qrbig hidden" id="qrLayer" role="dialog" aria-label="QR 코드 크게 보기">
@@ -103,14 +112,6 @@
         <div class="links"><a class="go" href="ladder.html">확인하기</a></div>
       </div>
     </nav>
-
-    <section class="ladder-sec" aria-label="마음 사다리 네 칸">
-      <div>
-        <h2>마음 사다리 네 칸</h2>
-        <p>친구의 첫말을 듣고 아래에서부터 한 칸씩 올라가요. 출발 칸의 말은 피하고, 들은 말을 되짚고, 기분을 알아주고, 도울 일을 물어요.</p>
-      </div>
-      <div class="ladder" id="ladder" aria-label="질문 사다리 네 칸"></div>
-    </section>
 
     <section class="join" aria-label="태블릿으로 들어오기">
       <button class="qr" id="qrBtn" aria-label="QR 코드 크게 보기"><img src="assets/qr-home.svg" alt="마음 사다리 학생 화면 QR 코드"></button>
