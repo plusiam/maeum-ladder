@@ -46,13 +46,15 @@
     .b small { display: block; font-size: .78rem; opacity: .8; }
     .b.me { align-self: flex-end; background: #fff; border: 3px solid var(--c); border-bottom-right-radius: 4px; }
     .b.fr { align-self: flex-start; background: var(--sky); border-bottom-left-radius: 4px; }
+    .b.fr.first { border: 2px dashed var(--ink-soft); }
+    .base { font-size: .88rem; color: var(--ink-soft); margin: 0 0 8px; padding: 4px 10px; border-radius: 999px; background: #f4f3f8; display: inline-block; }
     .b.fr.real { background: color-mix(in srgb, var(--rung2) 22%, #fff); }
     .b.fr.want { background: color-mix(in srgb, var(--rung3) 22%, #fff); }
 
     .task { background: #fff; border: 2px solid var(--line); border-radius: var(--radius-lg); padding: 20px; }
     .task h3 { font-size: 1.45rem; margin: 6px 0 4px; }
     .task .lead { color: var(--ink-soft); margin: 0 0 12px; }
-    .quote { padding: 8px 14px; border-left: 6px solid var(--rung0); background: #f4f3f8; border-radius: 0 8px 8px 0; margin: 0 0 12px; font-size: 1.15rem; }
+    .quote { padding: 8px 14px; border-left: 6px solid var(--rung2); background: var(--sky); border-radius: 0 8px 8px 0; margin: 0 0 12px; font-size: 1.15rem; }
     textarea.say { width: 100%; min-height: 3.2em; font: inherit; font-size: 1.2rem; padding: 10px 12px; border: 3px solid var(--line); border-radius: var(--radius-sm); resize: vertical; background: #fff; }
     textarea.say:focus { border-color: var(--focus); outline: none; }
     .fb { margin-top: 10px; padding: 10px 14px; border-radius: var(--radius-sm); font-size: 1rem; }
@@ -102,7 +104,7 @@
       <div>
         <span class="stage-tag">1단계 · 혼자 연습</span>
         <h1 id="homeTitle">사다리를 한 칸씩 올라가요</h1>
-        <p class="lead" id="homeLead">그림 속 친구에게 사다리 네 칸 순서대로 말을 걸어 봐요. 칸마다 바로 알려 줘요.</p>
+        <p class="lead" id="homeLead">그림 속 친구가 먼저 한마디를 해요. 장단이 자세로 듣고, 사실이 → 기분이 → 도움 묻기 순서로 대답해 봐요.</p>
         <ul id="homeList">
           <li>스스로 해내면 그 칸에 <b>★</b>이 생겨요.</li>
           <li>두 번 막히면 고르기로 도와줘요. 그 칸은 다른 친구로 다시 연습해요.</li>
@@ -141,13 +143,13 @@
     const esc = (s) => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 
     /* ---------- 이 기기에만 남는 기록 ---------- */
-    const KEY = "maeum-ladder-practice";
+    const KEY = "maeum-ladder-practice-v3";
     let rec = { stars: [false, false, false, false], tried: [false, false, false, false], seen: [], rounds: 0 };
     try { rec = Object.assign(rec, JSON.parse(localStorage.getItem(KEY)) || {}); } catch (e) {}
     const saveRec = () => { try { localStorage.setItem(KEY, JSON.stringify(rec)); } catch (e) {} };
 
     /* ---------- 이번 판 ---------- */
-    let card = null, todo = [], cur = -1, fails = 0, scaffold = false, open = "", helpAsk = "";
+    let card = null, todo = [], cur = -1, fails = 0, scaffold = false, helpAsk = "";
 
     /* ---------- 별 사다리 ---------- */
     function ladderHTML(nowStep) {
@@ -187,9 +189,10 @@
       rec.seen.push(card.n); rec.rounds++; saveRec();
       const all = rec.stars.every(Boolean);
       todo = all ? [0, 1, 2, 3] : [0, 1, 2, 3].filter(k => !rec.stars[k]);
-      open = pickOne(OPEN_ASKS); helpAsk = pickOne(HELP_ASKS);
+      helpAsk = pickOne(HELP_ASKS);
       $("home").classList.add("hidden"); $("play").classList.remove("hidden");
       drawScene(); $("chat").innerHTML = "";
+      hear(card.first, "first");   // 친구가 먼저 말해요
       cur = -1; nextStep(0);
       window.scrollTo(0, 0);
     }
@@ -207,14 +210,14 @@
       $("chat").insertAdjacentHTML("beforeend", `<div class="b me ${r.color}" style="--c:var(--${r.color})"><small>나 · ${r.name}</small>${esc(text)}</div>`);
     }
     function hear(text, kind = "") {
-      $("chat").insertAdjacentHTML("beforeend", `<div class="b fr ${kind}"><small>${card.who}</small>${esc(text)}</div>`);
+      $("chat").insertAdjacentHTML("beforeend", `<div class="b fr ${kind}"><small>${card.who}${kind === "first" ? " · 첫말" : ""}</small>${esc(text)}</div>`);
     }
+    const baseNote = () => `<p class="base">장단이 자세: ${BASE.hint}</p>`;
 
     // ★ 받은 칸은 예시 문장으로 자동 진행 (대화가 끊기지 않게)
     function autoStep(step) {
-      if (step === 0) { say(0, card.judge); hear(card.judgeReply); }
-      if (step === 1) { say(1, card.check); hear(card.checkReply); }
-      if (step === 2) { say(2, open); hear(card.reveal, "real"); }
+      if (step === 1) { say(1, card.fact); hear(card.factReply); }
+      if (step === 2) { say(2, card.feelLine); hear(card.feelYes, "real"); }
       if (step === 3) { say(3, helpAsk); hear(card.want, "want"); }
     }
 
@@ -244,12 +247,12 @@
     function drawTask() {
       $("playLadder").innerHTML = ladderHTML(cur);
       if (cur === 0) return taskSort();
-      if (cur === 1) return taskWrite(1, "짐작을 질문으로 바꿔요",
-        `출발 칸의 말을 ${card.who}에게 묻는 말로 바꿔 써요.`, `<p class="quote">“${card.judge}”</p>`,
-        LadderCheck.rung1, [card.check, card.judge.replace(/\.$/, "!"), card.optionQ]);
-      if (cur === 2) return taskWrite(2, "마음을 직접 물어요",
-        `${card.who}가 자기 마음을 스스로 말할 수 있게 물어봐요. 마음 낱말은 넣지 않아요.`, "",
-        LadderCheck.rung2, [open, card.optionQ, card.check]);
+      if (cur === 1) return taskWrite(1, "들은 말을 되짚어요 (사실이)",
+        `${card.who}가 한 말을 다시 짚어 확인해요. 아직 기분은 말하지 않아요.`, `<p class="quote">${card.who}: “${esc(card.first)}”</p>`,
+        (t) => LadderCheck.fact(t, card), [card.fact, card.cut, card.feelLine]);
+      if (cur === 2) return taskWrite(2, "기분을 알아줘요 (기분이)",
+        `들은 말에서 ${card.who}의 기분을 읽어 말해 줘요. 잘 모르겠으면 기분을 물어봐도 돼요.`, `<p class="quote">${card.who}: “${esc(card.factReply)}”</p>`,
+        LadderCheck.feel, [card.feelLine, card.cut, "그래서 어떻게 됐어?"]);
       if (cur === 3) return taskWrite(3, "도움을 물어요",
         `${card.who}의 마음을 들었어요. 이제 무엇을 도와주면 좋을지 물어봐요.`, "",
         LadderCheck.rung3, [helpAsk, "내가 대신 다 해 줄게.", "힘내! 별일 아니야."]);
@@ -258,15 +261,15 @@
     // 출발 칸: 네 문장을 사다리 칸에 올려놓기
     function taskSort() {
       const items = shuffle([
-        { s: card.judge, a: 0, why: "내 짐작을 사실처럼 말했어요." },
-        { s: card.check, a: 1, why: "짐작한 마음에 물음표를 붙였어요." },
-        { s: open, a: 2, why: "마음 낱말 없이 물었어요. 친구가 직접 말해요." },
+        { s: card.cut, a: 0, why: "다 듣기 전에 판단하거나 충고했어요." },
+        { s: card.fact, a: 1, why: "친구가 한 말을 되짚었어요." },
+        { s: card.feelLine, a: 2, why: "들은 말에서 기분을 읽어 말해 줬어요." },
         { s: helpAsk, a: 3, why: "무엇을 도와줄지 물었어요." }
       ]);
       const pickd = items.map(() => -1);
       const draw = (checked) => {
         $("task").innerHTML = head(0, "말을 사다리 칸에 올려놓아요",
-          `${card.who}에게 건넬 수 있는 말 네 개예요. 각 말이 어느 칸인지 골라요.`) +
+          `${card.who}의 첫말에 할 수 있는 대답 네 개예요. 각 말이 어느 칸인지 골라요.`) + `<p class="quote">${card.who}: “${esc(card.first)}”</p>` +
           `<div class="sort">${items.map((it, i) => {
             const st = checked ? (pickd[i] === it.a ? "right" : "wrong") : "";
             return `<div class="it ${st}"><span class="s">“${esc(it.s)}”</span>
@@ -280,9 +283,8 @@
           const right = items.every((it, i) => pickd[i] === it.a);
           if (right) {
             const star = pass(0);
-            say(0, card.judge); hear(card.judgeReply);
-            $("task").innerHTML = head(0, star ? "★ 출발 칸 통과!" : "출발 칸 통과", "단정하는 말을 들은 친구의 대답을 보세요. 이제 사다리를 올라가요.") +
-              `<div class="fb yes">“${esc(card.judge)}” → ${card.who}: “${esc(card.judgeReply)}”<br>짐작을 사실처럼 말하면 대화가 닫히기 쉬워요.</div>
+            $("task").innerHTML = head(0, star ? "★ 출발 칸 통과!" : "출발 칸 통과", "출발 칸의 말은 피하고, 사다리를 올라가요.") +
+              `<div class="fb yes">“${esc(card.cut)}” 같은 말은 친구 말을 다 듣기 전에 정해 버려요. 그러면 친구는 더 말하지 않게 돼요.</div>
               <div class="actions"><button class="btn primary" id="go">1층으로</button></div>`;
             $("playLadder").innerHTML = ladderHTML(0);
             $("go").onclick = () => nextStep(1);
@@ -299,7 +301,7 @@
     // 1~3층: 직접 쓰기 → 두 번 막히면 고르기 도움
     function taskWrite(step, title, lead, extra, check, choices) {
       const r = LADDER[step];
-      $("task").innerHTML = head(step, title, lead) + extra +
+      $("task").innerHTML = head(step, title, lead) + extra + baseNote() +
         `<textarea class="say" id="say" rows="2" placeholder="${card.who}에게 할 말을 써요"></textarea>
         <div class="actions"><button class="btn primary" id="ok">말 건네기</button></div><div id="fb"></div><div id="fbPick"></div>`;
       $("say").focus();
@@ -328,13 +330,14 @@
     function passed(step, text, msg) {
       const star = pass(step);
       say(step, text);
-      if (step === 1) hear(LadderCheck.reply1(text, card));
-      if (step === 2) hear(card.reveal, "real");
+      if (step === 1) hear(card.factReply);
+      if (step === 2) hear(LadderCheck.replyFeel(text, card), "real");
       if (step === 3) hear(card.want, "want");
       $("playLadder").innerHTML = ladderHTML(step);
       const next = step === 3 ? "도울 방법 찾기" : `${step + 1}층으로`;
       $("task").innerHTML = head(step, star ? `★ ${LADDER[step].name} 통과!` : `${LADDER[step].name} 통과`, msg) +
-        (step === 2 ? `<div class="fb yes">물어보니 ${card.who}가 진짜 마음을 말해 주었어요. 처음 짐작과 같았나요?</div>` : "") +
+        (step === 1 ? `<div class="fb yes">되짚어 주니 ${card.who}가 이야기를 더 해 주었어요. 이제 그 말에서 기분을 읽어 봐요.</div>` : "") +
+        (step === 2 ? `<div class="fb yes">${LadderCheck.sameFeel(text, card) || LadderCheck.feelCount(text) === 0 ? `${card.who}가 진짜 마음을 말해 주었어요.` : `내가 읽은 기분과 달랐지만, 말해 줬기 때문에 ${card.who}가 바로잡아 주었어요. 이것도 확인이에요.`} 처음 그림만 보고 짐작한 마음과 같았나요?</div>` : "") +
         `<div class="actions"><button class="btn primary" id="go">${next}</button></div>`;
       $("go").onclick = () => step === 3 ? taskHelps() : nextStep(step + 1);
     }
@@ -368,7 +371,7 @@
       try { localStorage.removeItem(KEY); } catch (e) {}
       rec = { stars: [false, false, false, false], tried: [false, false, false, false], seen: [], rounds: 0 };
       $("homeTitle").textContent = "사다리를 한 칸씩 올라가요";
-      $("homeLead").textContent = "그림 속 친구에게 사다리 네 칸 순서대로 말을 걸어 봐요. 칸마다 바로 알려 줘요.";
+      $("homeLead").textContent = "그림 속 친구가 먼저 한마디를 해요. 장단이 자세로 듣고, 사실이 → 기분이 → 도움 묻기 순서로 대답해 봐요.";
       $("homeList").innerHTML = `<li>스스로 해내면 그 칸에 <b>★</b>이 생겨요.</li><li>두 번 막히면 고르기로 도와줘요. 그 칸은 다른 친구로 다시 연습해요.</li><li>네 칸 모두 ★을 받으면 2단계 역할극 준비 끝!</li>`;
       showHome();
     };

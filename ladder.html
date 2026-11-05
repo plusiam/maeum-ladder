@@ -38,7 +38,10 @@
     .rung.rung1.pass .badge { color: var(--ink); }
     .rung.fail .badge { background: #e0614f; color: #fff; }
     .rung textarea { width: 100%; margin-top: 6px; border: 0; border-bottom: 2px dashed var(--line); resize: none; font: inherit; font-size: 1.15rem; background: transparent; padding: 4px 2px; min-height: 2.2em; }
-    .rung .fixed { margin-top: 4px; font-size: 1.15rem; }
+    .rung .fixed { margin-top: 4px; font-size: 1.05rem; color: var(--ink-soft); }
+    .firstline { margin: 4px 0 0; padding: 10px 14px; border-radius: 14px; border: 2px dashed var(--ink-soft); background: var(--sky); font-size: 1.15rem; }
+    .firstline small { display: block; font-size: .8rem; color: var(--ink-soft); }
+    .basebar { margin: 8px 0 0; font-size: .9rem; color: var(--ink-soft); }
     .rung .msg { font-size: .92rem; color: #b4483a; margin-top: 4px; }
     .rung .rep { margin-top: 6px; padding: 6px 12px; border-radius: 12px; background: var(--sky); font-size: 1rem; }
     .rung .rep small { color: var(--ink-soft); margin-right: 6px; }
@@ -82,7 +85,8 @@
         <h2 id="sheetTitle">나의 질문 사다리</h2>
         <input id="me" placeholder="번호 또는 별칭" aria-label="번호 또는 별칭">
       </div>
-      <p class="lead" style="margin-top:6px">출발 칸의 말을 1층부터 한 칸씩 바꿔 써요. 다 쓰면 아래 [확인하기]를 눌러요.</p>
+      <p class="lead" style="margin-top:6px">친구의 첫말을 듣고 1층부터 한 칸씩 대답을 써요. 한 칸을 쓰고 아래 [확인하기]를 누르면 친구가 대답해요. 그 대답을 듣고 다음 칸을 써요.</p>
+      <p class="firstline" id="firstLine"></p>
       <div class="ladder" id="ladder"></div>
 
       <div class="helpbox lock" id="helpbox">
@@ -115,12 +119,12 @@
   <script>
     const $ = (id) => document.getElementById(id);
     const esc = (s) => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
-    const KEY = "maeum-ladder-check";
-    const CHECKS = [null, LadderCheck.rung1, LadderCheck.rung2, LadderCheck.rung3];
+    const KEY = "maeum-ladder-check-v3";
+    const CHECKS = [null, (t) => LadderCheck.fact(t, card()), (t) => LadderCheck.feel(t), LadderCheck.rung3];
 
     // 1단계 연습에서 이미 만난 친구 (같은 기기일 때만 알 수 있음)
     let seen = [];
-    try { seen = (JSON.parse(localStorage.getItem("maeum-ladder-practice")) || {}).seen || []; } catch (e) {}
+    try { seen = (JSON.parse(localStorage.getItem("maeum-ladder-practice-v3")) || {}).seen || []; } catch (e) {}
 
     // 상태: 칸별 확인 횟수와 통과 시점(처음/고쳐서)
     const blank = () => ({ n: null, me: "", rungs: ["", "", ""], tries: [0, 0, 0], passAt: [0, 0, 0], helps: [0, 1, 2, 3, 4].map(() => ({ text: "", checks: [false, false, false] })), helpTries: 0, helpPass: 0, used: "", now: "", line: "" });
@@ -145,14 +149,15 @@
       $("scene").className = "scene";
       $("scene").innerHTML = `<img alt="${c.n}번 상황 그림" src="${imgPath(c.n)}"><div><b>${c.n}. ${c.who}</b> · ${c.view}<div class="clues">보이는 것: ${c.see.join(" · ")}</div></div>`;
       $("scene").querySelector("img").onerror = (e) => { e.target.remove(); $("scene").classList.add("noimg"); };
-      $("sheetTitle").textContent = `${c.who}에게 건네는 질문 사다리`;
+      $("sheetTitle").textContent = `${c.who}의 말을 들어 주는 사다리`;
+      $("firstLine").innerHTML = `<small>${c.who} · 첫말</small>“${esc(c.first)}”<span class="basebar" style="display:block">${BASE.name}: ${BASE.hint}</span>`;
     }
 
     function drawLadder() {
       const c = card();
       $("ladder").innerHTML = LADDER.map(r => {
-        if (r.step === 0) return `<div class="rung rung0 pass" style="--c:var(--rung0)"><div class="top">${r.name}<span class="badge">출발</span></div>
-          <div class="fixed">“${esc(c.judge)}”</div><div class="rep"><small>${c.who}</small>${esc(c.judgeReply)}</div></div>`;
+        if (r.step === 0) return `<div class="rung rung0 pass" style="--c:var(--rung0)"><div class="top">${r.name}<span class="badge">피할 말</span></div>
+          <div class="fixed">이런 말은 피해요: “${esc(c.cut)}”</div></div>`;
         const k = r.step - 1;
         return `<div class="rung ${r.color}" style="--c:var(--${r.color})" id="box${k}"><div class="top">${r.name}<span class="badge" id="bd${k}">아직</span></div>
           <textarea id="r${k}" rows="1" aria-label="${r.name}"></textarea><div id="ms${k}"></div></div>`;
@@ -178,7 +183,7 @@
         if (st.passAt[k]) {
           box.classList.add("pass");
           bd.textContent = st.passAt[k] === 1 ? "처음에 올라감" : "고쳐서 올라감";
-          const rep = k === 0 ? LadderCheck.reply1(st.rungs[0], c) : k === 1 ? c.reveal : c.want;
+          const rep = k === 0 ? c.factReply : k === 1 ? LadderCheck.replyFeel(st.rungs[1], c) : c.want;
           ms.innerHTML = `<div class="rep"><small>${c.who}</small>${esc(rep)}</div>`;
         } else if (st.tries[k]) {
           box.classList.add("fail"); bd.textContent = "다시 생각해요";
