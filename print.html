@@ -60,13 +60,13 @@
 
   <article class="page">
     <header class="head">
-      <h1>마음 사다리<small>3단계 · 혼자 확인</small></h1>
+      <h1>마음 사다리<small>3단계 · 혼자 확인 · 사실이·기분이</small></h1>
       <div class="idbox"><span>&nbsp;</span>학년 <span>&nbsp;</span>반 <span>&nbsp;</span>번 이름 <span style="min-width:80px">&nbsp;</span></div>
     </header>
     <p class="inq"><b>탐구질문</b><span id="inq"></span></p>
 
-    <h2>1. 나의 질문 사다리<small>출발 칸의 단정하는 말을 한 칸씩 바꾸며 올라가요.</small></h2>
-    <p class="who-line">말을 건넬 친구(가상): <span>&nbsp;</span>번 <span style="min-width:90px">&nbsp;</span> · 이 친구가 보이는 모습: <span style="min-width:230px">&nbsp;</span></p>
+    <h2>1. 들어 주는 사다리<small>친구의 첫말을 장단이 자세로 듣고, 1층부터 차례로 대답해요.</small></h2>
+    <p class="who-line">친구(가상): <span>&nbsp;</span>번 <span style="min-width:90px">&nbsp;</span> · 친구의 첫말: <span style="min-width:300px">&nbsp;</span></p>
     <div class="ladder" id="ladder"></div>
 
     <h2>2. 친구의 바람을 듣고 도울 방법 세 가지 이상<small>방법마다 세 가지 기준을 점검해요.</small></h2>
@@ -84,8 +84,9 @@
     <div class="one"><b>마음 한 줄</b> 다음 대화에서 꼭 써 볼 문장</div>
 
     <div class="check">
-      <span>□ 짐작을 질문으로 바꾸었다.</span>
-      <span>□ 마음 낱말 없이 직접 물었다.</span>
+      <span>□ 장단이 자세로 끝까지 들었다.</span>
+      <span>□ 친구 말을 되짚었다(사실이).</span>
+      <span>□ 들은 말에서 기분을 읽어 말해 줬다(기분이).</span>
       <span>□ 도움을 묻고, 바람을 바탕으로 세 가지 이상 찾았다.</span>
       <span>□ '괜찮아'라는 대답도 존중한다.</span>
     </div>
@@ -97,12 +98,12 @@
   <script>
     document.getElementById("inq").textContent = LESSON.inquiry;
     // 칸마다: 출발은 문장 틀, 2층·3층 아래에는 친구의 대답을 적는 줄
-    const REP = { 1: "친구의 대답:", 2: "친구가 말한 진짜 마음:", 3: "친구의 바람: (아래 2번에 옮겨 적어요)" };
+    const REP = { 1: "친구가 더 해 준 말:", 2: "친구가 말한 진짜 기분:" };
     document.getElementById("ladder").innerHTML = LADDER.map(r => `
       <div class="rung ${r.color}">
         <div class="t">${r.name}<small>${r.hint}</small></div>
-        ${r.step === 0 ? `<div class="w" style="padding-top:4px;height:28px">“너 ______________ 구나.”</div>` : `<div class="w"></div>`}
-        ${r.step === 2 ? `<div class="rep">${REP[2]} <span>&nbsp;</span></div>` : ""}
+        ${r.step === 0 ? `<div class="w" style="padding-top:4px;height:28px">이런 말은 피해요: “${LADDER[0].example}”</div>` : `<div class="w"></div>`}
+        ${REP[r.step] ? `<div class="rep">${REP[r.step]} <span>&nbsp;</span></div>` : ""}
       </div>`).join("");
     HELP_SHORT.forEach((q, j) => document.getElementById("c" + j).textContent = q);
     document.getElementById("hrows").innerHTML = [1, 2, 3, 4].map(i => `<tr><td>${i}</td><td class="l"></td><td>□</td><td>□</td><td>□</td></tr>`).join("");

@@ -21,6 +21,7 @@
     .rung.rung1 .lv { color: var(--ink); }
     .rung .t { font-family: var(--font-head); font-size: 1rem; color: var(--ink-soft); }
     .rung .ex { font-size: 1.15rem; }
+    .basehint { margin: 14px 0 0; padding: 10px 16px; border-radius: var(--radius-sm); border: 2px dashed var(--rung1); font-size: 1rem; }
 
     /* 세 단계 */
     .steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin: 40px 0 10px; }
@@ -56,6 +57,7 @@
         <h1>마음 사다리</h1>
         <p class="sub" id="subtitle"></p>
         <div class="inquiry"><b>오늘의 탐구질문</b><p id="inquiry"></p></div>
+        <p class="basehint" id="basehint"></p>
       </div>
       <div class="ladder" id="ladder" aria-label="질문 사다리 네 칸"></div>
     </section>
@@ -64,13 +66,13 @@
       <div class="stp s1" style="--c:var(--rung1)">
         <span class="tag">1단계 · 연습</span>
         <h2>혼자 사다리 오르기</h2>
-        <p>그림 속 친구에게 네 칸 순서대로 말을 걸어요. 칸마다 바로 알려 주고, ★이 없는 칸만 다시 연습해요.</p>
+        <p>친구의 첫말에 사실이(되짚기) → 기분이(마음 알아주기) → 도움 묻기로 대답해요. 칸마다 바로 알려 주고, ★이 없는 칸만 다시 연습해요.</p>
         <div class="links"><a href="practice.html">연습 시작 <small>학생 · 태블릿</small></a></div>
       </div>
       <div class="stp s2" style="--c:var(--rung2)">
         <span class="tag">2단계 · 역할극</span>
         <h2>3~4인조 역할극</h2>
-        <p>마음 친구 · 말 거는 친구 · 관찰자(· 기록이)로 역할을 나누고, 라운드마다 바꿔요.</p>
+        <p>마음 친구 · 들어 주는 친구 · 관찰자(· 기록이)로 역할을 나누고, 라운드마다 바꿔요.</p>
         <div class="links">
           <a href="game.html">칠판 화면 <small>교사 · TV</small></a>
           <a href="cards.html">카드 · 관찰 카드 · 조 기록지 <small>교사 · 인쇄</small></a>
@@ -79,7 +81,7 @@
       <div class="stp s3" style="--c:var(--rung3)">
         <span class="tag">3단계 · 확인</span>
         <h2>나의 질문 사다리</h2>
-        <p>힌트 없이 새 친구에게 1~3층 말과 도울 방법 세 가지를 쓰고, 결과 카드를 저장해요.</p>
+        <p>힌트 없이 새 친구의 첫말에 1~3층 대답과 도울 방법 세 가지를 쓰고, 결과 카드를 저장해요.</p>
         <div class="links">
           <a href="ladder.html">확인하기 <small>학생 · 태블릿</small></a>
           <a href="print.html">A4 학습지 <small>교사 · 인쇄</small></a>
@@ -95,13 +97,16 @@
     <aside class="safety"><b>함께 지키는 약속</b><ul id="safety"></ul></aside>
 
     <p class="footer"><a href="setup.html">칠판 그림 준비하기</a></p>
-    <p class="footer" style="margin-top:6px">대구마음교육연구회 17차시 『마음여행』 8차시 주제를 바탕으로 룰루랄라 한기쌤이 따로 구성한 수업 도구입니다. 연구회 원고·활동지와는 별개입니다.</p>
+    <p class="footer" style="margin-top:6px">룰루랄라 한기쌤의 개별 수업 도구입니다. 대구마음교육연구회 『마음여행』 8차시 주제에서 출발했지만 따로 구성했으며, 연구회 원고·PPT·활동지와는 별개이고 그 원고에 반영하지 않습니다.</p>
+    <p class="footer" style="margin-top:6px" id="srcnote"></p>
   </main>
 
   <script src="assets/data.js"></script>
   <script>
     document.getElementById("subtitle").textContent = LESSON.subtitle;
     document.getElementById("inquiry").textContent = LESSON.inquiry;
+    document.getElementById("basehint").innerHTML = `<b>모든 칸에서 · ${BASE.name}</b> ${BASE.hint}`;
+    document.getElementById("srcnote").textContent = LESSON.source;
     document.getElementById("ladder").innerHTML = LADDER.map(r => `
       <div class="rung ${r.color}"><span class="lv">${r.step === 0 ? "출발" : r.step}</span>
         <div><div class="t">${r.name}</div><div class="ex">“${r.example}”</div></div></div>`).join("");
